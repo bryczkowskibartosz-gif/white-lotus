@@ -1,0 +1,9 @@
+Current working version:
+- TEST_MODE true
+- 5 unit board limit
+- Action Phase / Reaction Phase
+- Lotus Seal reaction card works
+- Ember Strike spell works
+- Units can attack hero
+- Units can attack enemy units
+- Dead units are removed

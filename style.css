@@ -1,0 +1,138 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #202124;
+  color: white;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+#game {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.player-area {
+  background: #2f3136;
+  border: 2px solid #555;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.enemy {
+  background: #3a2f2f;
+}
+
+.current {
+  background: #2f3a32;
+}
+
+.board,
+.hand {
+  display: flex;
+  gap: 12px;
+  min-height: 120px;
+  padding: 12px;
+  border: 2px dashed #777;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.card {
+  width: 120px;
+  min-height: 160px;
+  background: #f4e4b8;
+  color: #222;
+  border: 2px solid #8b6f3d;
+  border-radius: 10px;
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+}
+
+.card h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.card p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+button {
+  font-size: 18px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f4e4b8;
+  color: #222;
+  font-weight: bold;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+#game-message {
+  min-height: 24px;
+  font-weight: bold;
+  color: #f4e4b8;
+}
+
+.selected-card {
+  outline: 4px solid #ffffff;
+  transform: translateY(-6px);
+}
+
+.selected-reaction-card {
+  outline: 4px solid #9be7ff;
+  transform: translateY(-6px);
+}
+
+.reaction-target {
+  outline: 4px solid #ffdf6b;
+}
+
+.selected-spell-card {
+  outline: 4px solid #ff8a8a;
+  transform: translateY(-6px);
+}
+
+.unit-card {
+  background: #f4e4b8;
+}
+
+.spell-card {
+  background: #ffd6d6;
+}
+
+.reaction-card {
+  background: #d9efff;
+}
+
+.fire-element {
+  border: 3px solid #d96b2b;
+}
+
+.earth-element {
+  border: 3px solid #8b6f3d;
+}
+
+.air-element {
+  border: 3px solid #6ea8d9;
+}
+
+.spirit-element {
+  border: 3px solid #9b7bd6;
+}
