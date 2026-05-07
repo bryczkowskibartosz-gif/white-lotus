@@ -2,7 +2,8 @@ const cards = [
   {
     id: "lotus_seal",
     name: "Lotus Seal",
-    element: "Spirit",
+    element: "Neutral",
+    school: "Spirit",
     type: "reaction",
     cost: 0,
     reactionType: "destroy_summoned_unit",
@@ -13,6 +14,7 @@ const cards = [
     id: "ember_strike",
     name: "Ember Strike",
     element: "Fire",
+    school: "Firebending",
     type: "spell",
     cost: 1,
     spellType: "damage_enemy_unit",
@@ -30,6 +32,7 @@ const cards = [
     health: 2,
     text: "A small aggressive unit."
   },
+
   {
     id: "stone_guardian",
     name: "Stone Guardian",
@@ -40,6 +43,7 @@ const cards = [
     health: 4,
     text: "A sturdy defensive unit."
   },
+
   {
     id: "air_acolyte",
     name: "Air Acolyte",
@@ -49,5 +53,31 @@ const cards = [
     attack: 3,
     health: 1,
     text: "Fast, but fragile."
+  },
+
+  {
+    id: "flowing_touch",
+    name: "Flowing Touch",
+    element: "Water",
+    school: "Waterbending",
+    type: "spell",
+    keywords: ["Flow"],
+    cost: 1,
+    spellType: "heal_friendly_unit",
+    heal: 2,
+    text: "Flow. Restore 2 HP to a friendly unit."
+  },
+
+  {
+    id: "river_spark",
+    name: "River Spark",
+    element: "Water",
+    school: "Waterbending",
+    type: "spell",
+    keywords: ["Flow"],
+    cost: 1,
+    spellType: "damage_enemy_unit",
+    damage: 1,
+    text: "Flow. Deal 1 damage to an enemy unit."
   }
 ];

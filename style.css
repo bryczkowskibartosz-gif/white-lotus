@@ -114,25 +114,29 @@ button:hover {
 }
 
 .spell-card {
-  background: #ffd6d6;
+  background: #ffd0d0;
 }
 
 .reaction-card {
-  background: #d9efff;
+  background: #d6ecff;
 }
 
 .fire-element {
-  border: 3px solid #d96b2b;
+  border: 5px solid #c02d2b;
+}
+
+.water-element {
+  border: 5px solid #0b3d91;
 }
 
 .earth-element {
-  border: 3px solid #8b6f3d;
+  border: 5px solid #23571c;
 }
 
 .air-element {
-  border: 3px solid #6ea8d9;
+  border: 5px solid #cb9b21;
 }
 
-.spirit-element {
-  border: 3px solid #9b7bd6;
+.neutral-element {
+  border: 5px solid #9e9e9e;
 }

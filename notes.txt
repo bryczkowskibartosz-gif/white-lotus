@@ -7,3 +7,62 @@ Current working version:
 - Units can attack hero
 - Units can attack enemy units
 - Dead units are removed
+
+Reaction card balance:
+Reaction cards should usually cost 0–2 Chi.
+They can be stronger than normal cards only when their condition is narrow.
+Flow cards should be slightly weaker than pure Reaction cards because they can be played in both Action Phase and Reaction Phase.
+
+A card with Flow can be played during both Action Phase and Reaction Phase.
+Flow cards should usually be flexible, defensive or adaptive effects.
+Flow should mostly belong to Water.
+A flow card should have at least one of these reasons to play it in the Reaction Phase:
+- uses leftover Chi before refreshing,
+- saves/finishes a unit before the next turn,
+- has a bonus if played in the Reaction Phase,
+- targets units with summonedThisTurn,
+- protects against future turn start effects.
+
+Chi rule:
+Each player has one Chi pool.
+Chi refreshes at the start of that player's Action Phase.
+Unspent Chi can be used during that player's next Reaction Phase.
+Reaction cards spend the same Chi as normal cards.
+
+Summoning rule:
+Units summoned during Action Phase or Reaction Phase cannot attack until the player's next Action Phase, unless the card has a special keyword
+
+Current Reaction Phase rule:
+Reactions do not interrupt attacks or spells.
+Damage resolves immediately.
+Dead units are removed before Reaction Phase.
+Reaction cards can only affect units that survived the Action Phase.
+
+Latest update:
+- Added element/school distinction.
+- Element represents class/deck identity: Fire, Water, Earth, Air, Neutral.
+- School represents technique/theme, e.g. Spirit, Waterbending, Firebending.
+- School currently has no mechanical effect.
+- Added visual clarity:
+  - card type is represented by background color
+  - element is represented by thick border color
+  - school is shown as text only
+- Added neutral element support.
+- Hand and board cards now both show type + element visually.
+
+Current visual rules:
+- Unit = beige background
+- Spell = pink/red background
+- Reaction = light blue background
+- Fire = red border
+- Water = dark blue border
+- Earth = earthy green border
+- Air = cream/yellow border
+- Neutral = gray border
+
+Next possible mechanics:
+- River Spark bonus when played during Reaction Phase.
+- Guard keyword for Earth units.
+- Momentum keyword for Air cards.
+- Ignite/Flare-style mechanic for Fire.
+- More card design for each element.
