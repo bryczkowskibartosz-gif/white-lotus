@@ -60,9 +60,9 @@ Current visual rules:
 - Air = cream/yellow border
 - Neutral = gray border
 
-Next possible mechanics:
-- River Spark bonus when played during Reaction Phase.
-- Guard keyword for Earth units.
-- Momentum keyword for Air cards.
-- Ignite/Flare-style mechanic for Fire.
-- More card design for each element.
+Implemented keywords:
+- Swift: unit can attack the turn it is played.
+- Buff: move can give stats to a friendly unit.
+- Guard: enemy attacks must target Guard units first.
+- Dodge: prevents the first damage instance dealt to this unit.
+- Ignite: bonus activates if you damaged the enemy hero earlier this turn. Ignite does not activate from the same card's damage.
