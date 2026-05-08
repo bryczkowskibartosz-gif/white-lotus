@@ -26,11 +26,13 @@ const cards = [
     id: "flame_adept",
     name: "Flame Adept",
     element: "Fire",
+    school: "Firebending",
     type: "unit",
     keywords: ["Ignite"],
     cost: 1,
     attack: 1,
     health: 2,
+    igniteBuff: { attack: 1, health: 1 },
     text: "Ignite: Gain +1/+1."
   },
 
@@ -142,7 +144,8 @@ const cards = [
     cost: 3,
     spellType: "damage_enemy_hero",
     damage: 2,
-    text: "Deal 2 damage to the enemy hero. Ignite: Deal 5 damage instead."
+    igniteDamage: 4,
+    text: "Deal 2 damage to the enemy hero. Ignite: Deal 4 instead."
   },
 
   {

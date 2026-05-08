@@ -15,6 +15,7 @@ const gameState = {
       hp: 30,
       maxChi: 0,
       currentChi: 0,
+      damagedEnemyHeroThisTurn: false,
       deck: [],
       hand: [],
       board: []
@@ -24,6 +25,7 @@ const gameState = {
       hp: 30,
       maxChi: 0,
       currentChi: 0,
+      damagedEnemyHeroThisTurn: false,
       deck: [],
       hand: [],
       board: []
@@ -100,6 +102,35 @@ function playerHasGuardUnit(player) {
   });
 }
 
+function dealDamageToUnit(unit, damage) {
+  if (damage <= 0) {
+    return {
+      actualDamage: 0,
+      wasDodged: false
+    };
+  }
+
+  if (hasKeyword(unit, "Dodge") && !unit.dodgeUsed) {
+    unit.dodgeUsed = true;
+
+    return {
+      actualDamage: 0,
+      wasDodged: true
+    };
+  }
+
+  unit.currentHealth -= damage;
+
+  return {
+    actualDamage: damage,
+    wasDodged: false
+  };
+}
+
+function isIgniteActive(player) {
+  return player.damagedEnemyHeroThisTurn === true;
+}
+
 function getSelectedSpell() {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   return currentPlayer.hand[gameState.selectedSpellCardIndex];
@@ -164,6 +195,11 @@ function playCard(cardIndex) {
   }
 
   if (card.type === "spell") {
+    if (card.spellType === "damage_enemy_hero") {
+      castSpellOnEnemyHero(cardIndex);
+      return;
+    }
+
     selectSpellCard(cardIndex);
     return;
   }
@@ -185,22 +221,39 @@ function playCard(cardIndex) {
 
   currentPlayer.currentChi -= card.cost;
 
+  let attack = card.attack;
+  let health = card.health;
+  let igniteMessage = "";
+
+  if (
+    hasKeyword(card, "Ignite") &&
+    isIgniteActive(currentPlayer) &&
+    card.igniteBuff
+  ) {
+    attack += card.igniteBuff.attack;
+    health += card.igniteBuff.health;
+    igniteMessage = ` Ignite activated: +${card.igniteBuff.attack}/+${card.igniteBuff.health}.`;
+  }
+
   const unit = {
     ...card,
-    maxHealth: card.health,
-    currentHealth: card.health,
+    attack: attack,
+    health: health,
+    maxHealth: health,
+    currentHealth: health,
     canAttack: hasKeyword(card, "Swift"),
     hasAttacked: false,
-    summonedThisTurn: true
+    summonedThisTurn: true,
+    dodgeUsed: false
   };
 
   currentPlayer.board.push(unit);
   currentPlayer.hand.splice(cardIndex, 1);
 
   if (hasKeyword(card, "Swift")) {
-    showMessage(`${card.name} was played. It can attack immediately!`);
+    showMessage(`${card.name} was played. It can attack immediately!${igniteMessage}`);
   } else {
-    showMessage(`${card.name} was played. It can attack next turn.`);
+    showMessage(`${card.name} was played. It can attack next turn.${igniteMessage}`);
   }
 
   renderGame();
@@ -242,6 +295,7 @@ function selectSpellCard(cardIndex) {
   ) {
     showMessage(`${card.name} selected. Choose a target.`);
   }
+
   renderGame();
 }
 
@@ -364,6 +418,8 @@ function startActionPhase() {
 
   gameState.phase = "action";
 
+  currentPlayer.damagedEnemyHeroThisTurn = false;
+
   if (TEST_MODE) {
     currentPlayer.maxChi = 10;
     currentPlayer.currentChi = 10;
@@ -475,11 +531,17 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   if (spellCard.spellType === "damage_enemy_unit") {
     currentPlayer.currentChi -= spellCard.cost;
 
-    targetUnit.currentHealth -= spellCard.damage;
+    const damageResult = dealDamageToUnit(targetUnit, spellCard.damage);
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
 
-    let message = `${spellCard.name} dealt ${spellCard.damage} damage to ${targetUnit.name}.`;
+    let message = "";
+
+    if (damageResult.wasDodged) {
+      message = `${targetUnit.name} dodged ${spellCard.name}!`;
+    } else {
+      message = `${spellCard.name} dealt ${damageResult.actualDamage} damage to ${targetUnit.name}.`;
+    }
 
     if (targetUnit.currentHealth <= 0) {
       enemyPlayer.board.splice(enemyUnitIndex, 1);
@@ -494,6 +556,66 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   }
 
   showMessage("This move effect is not implemented yet.");
+}
+
+function castSpellOnEnemyHero(cardIndex) {
+  if (gameState.gameOver) {
+    return;
+  }
+
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const enemyPlayer = gameState.players[getEnemyPlayerIndex()];
+  const spellCard = currentPlayer.hand[cardIndex];
+
+  if (!spellCard || spellCard.type !== "spell") {
+    showMessage("Selected card is not a move.");
+    return;
+  }
+
+  if (spellCard.spellType !== "damage_enemy_hero") {
+    showMessage("This move cannot target the enemy hero.");
+    return;
+  }
+
+  const canCastDuringAction = gameState.phase === "action";
+  const canCastDuringReaction =
+    gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
+
+  if (!canCastDuringAction && !canCastDuringReaction) {
+    showMessage("This move cannot be played during this phase.");
+    return;
+  }
+
+  if (currentPlayer.currentChi < spellCard.cost) {
+    showMessage("Not enough Chi for this move.");
+    return;
+  }
+
+  const igniteWasActive = isIgniteActive(currentPlayer);
+
+  let damage = spellCard.damage;
+
+  if (igniteWasActive && spellCard.igniteDamage) {
+    damage = spellCard.igniteDamage;
+  }
+
+  currentPlayer.currentChi -= spellCard.cost;
+  enemyPlayer.hp -= damage;
+
+  currentPlayer.damagedEnemyHeroThisTurn = true;
+
+  currentPlayer.hand.splice(cardIndex, 1);
+
+  let message = `${spellCard.name} dealt ${damage} damage to ${enemyPlayer.name}.`;
+
+  if (igniteWasActive && spellCard.igniteDamage) {
+    message += " Ignite activated.";
+  }
+
+  showMessage(message);
+
+  checkGameOver();
+  renderGame();
 }
 
 function castSpellOnFriendlyUnit(friendlyUnitIndex) {
@@ -618,13 +740,25 @@ function attackEnemyUnit(enemyUnitIndex) {
     return;
   }
 
-  defender.currentHealth -= attacker.attack;
-  attacker.currentHealth -= defender.attack;
+  const defenderDamageResult = dealDamageToUnit(defender, attacker.attack);
+  const attackerDamageResult = dealDamageToUnit(attacker, defender.attack);
 
   attacker.hasAttacked = true;
   attacker.canAttack = false;
 
   let message = `${attacker.name} attacked ${defender.name}. `;
+
+  if (defenderDamageResult.wasDodged) {
+    message += `${defender.name} dodged the attack. `;
+  } else {
+    message += `${defender.name} took ${defenderDamageResult.actualDamage} damage. `;
+  }
+
+  if (attackerDamageResult.wasDodged) {
+    message += `${attacker.name} dodged the counterattack. `;
+  } else {
+    message += `${attacker.name} took ${attackerDamageResult.actualDamage} damage. `;
+  }
 
   if (attacker.currentHealth <= 0) {
     message += `${attacker.name} was destroyed. `;
@@ -692,6 +826,7 @@ function attackEnemyHero() {
   }
 
   enemyPlayer.hp -= attacker.attack;
+  currentPlayer.damagedEnemyHeroThisTurn = true;
 
   attacker.hasAttacked = true;
   attacker.canAttack = false;
@@ -954,17 +1089,30 @@ function renderBoard(player, boardId) {
     let keywordText = "";
 
     if (unit.keywords) {
-      keywordText = `<p>Keywords: ${unit.keywords.join(", ")}</p>`;
+      const visibleKeywords = unit.keywords.filter(function (keyword) {
+        return keyword !== "Dodge";
+      });
+
+      if (visibleKeywords.length > 0) {
+        keywordText = `<p>Keywords: ${visibleKeywords.join(", ")}</p>`;
+      }
+    }
+
+    let dodgeText = "";
+
+    if (hasKeyword(unit, "Dodge")) {
+      dodgeText = `<p>Dodge: ${unit.dodgeUsed ? "Used" : "Ready"}</p>`;
     }
 
     cardElement.innerHTML = `
-      <h4>${unit.name}</h4>
-      <p>Attack: ${unit.attack}</p>
-      <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
-      ${keywordText}
-      <p>Status: ${attackStatus}</p>
-      <p>${summonStatus}</p>
-    `;
+  <h4>${unit.name}</h4>
+  <p>Attack: ${unit.attack}</p>
+  <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
+  ${keywordText}
+  ${dodgeText}
+  <p>Status: ${attackStatus}</p>
+  <p>${summonStatus}</p>
+`;
 
     boardElement.appendChild(cardElement);
   });
