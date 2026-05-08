@@ -60,9 +60,56 @@ Current visual rules:
 - Air = cream/yellow border
 - Neutral = gray border
 
-Implemented keywords:
+Implemented:
 - Swift: unit can attack the turn it is played.
 - Buff: move can give stats to a friendly unit.
 - Guard: enemy attacks must target Guard units first.
 - Dodge: prevents the first damage instance dealt to this unit.
 - Ignite: bonus activates if you damaged the enemy hero earlier this turn. Ignite does not activate from the same card's damage.
+- damage_enemy_hero moves auto-cast without target selection.
+
+Next steps:
+1. Implement Momentum keyword
+- Momentum: bonus activates if you played a reaction card during your last Reaction Phase.
+- Track whether player played a reaction card.
+- Use it first on Sweeping Strikes.
+- Test if Momentum resets correctly.
+
+2. Implement remaining move effects
+- Ice Blast: deal damage and prevent a unit from attacking next turn.
+- Sweeping Strikes: deal damage to all enemy units.
+- Wind Slice: choose two enemy units and deal damage to both.
+
+3. Improve combat and targeting clarity
+- Highlight valid targets more clearly.
+- Show why a target cannot be clicked.
+- Improve Guard visual indicator.
+- Improve selected card visual feedback.
+
+4. Add basic deck/game flow polish
+- Add restart game button.
+- Add deck size display.
+- Add hand size maybe later.
+- Add simple win screen instead of only message text.
+
+5. Balance pass
+- Test each element against the others:
+  Fire vs Earth
+  Fire vs Water
+  Air vs Earth
+  Water vs Air
+- Adjust costs, attack, health and damage.
+- Make sure no keyword feels useless or too strong.
+
+6. Add more cards after mechanics are stable
+- More Fire Ignite cards.
+- More Air Momentum/reaction cards.
+- More Earth Guard/buff cards.
+- More Water Flow/heal/adapt cards.
+- Add a few Neutral cards.
+
+7. Later MVP goals
+- Build small fixed decks for Player 1 and Player 2.
+- Add simple enemy AI or hot-seat 2 player mode.
+- Add better card layout and visual clarity.
+- Add basic menu: Start Game / Restart / Rules.
