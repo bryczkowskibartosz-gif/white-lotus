@@ -38,7 +38,7 @@ function startGame() {
   player1.deck = [...cards, ...cards, ...cards];
   player2.deck = [...cards, ...cards, ...cards];
 
-  const startingHandSize = TEST_MODE ? 8 : 3;
+  const startingHandSize = TEST_MODE ? cards.length : 3;
 
   for (let i = 0; i < startingHandSize; i++) {
     drawCard(player1);
@@ -92,6 +92,12 @@ function hasKeyword(card, keyword) {
   }
 
   return card.keywords.includes(keyword);
+}
+
+function playerHasGuardUnit(player) {
+  return player.board.some(function (unit) {
+    return hasKeyword(unit, "Guard");
+  });
 }
 
 function getSelectedSpell() {
@@ -183,7 +189,7 @@ function playCard(cardIndex) {
     ...card,
     maxHealth: card.health,
     currentHealth: card.health,
-    canAttack: false,
+    canAttack: hasKeyword(card, "Swift"),
     hasAttacked: false,
     summonedThisTurn: true
   };
@@ -191,7 +197,11 @@ function playCard(cardIndex) {
   currentPlayer.board.push(unit);
   currentPlayer.hand.splice(cardIndex, 1);
 
-  showMessage(`${card.name} was played. It can attack next turn.`);
+  if (hasKeyword(card, "Swift")) {
+    showMessage(`${card.name} was played. It can attack immediately!`);
+  } else {
+    showMessage(`${card.name} was played. It can attack next turn.`);
+  }
 
   renderGame();
 }
@@ -205,7 +215,7 @@ function selectSpellCard(cardIndex) {
   }
 
   if (currentPlayer.currentChi < card.cost) {
-    showMessage("Not enough Chi for this spell.");
+    showMessage("Not enough Chi for this move.");
     return;
   }
 
@@ -221,13 +231,17 @@ function selectSpellCard(cardIndex) {
     showMessage(`${card.name} selected. Click one of your units.`);
   }
 
+  if (card.spellType === "buff_friendly_unit") {
+    showMessage(`${card.name} selected. Click one of your units.`);
+  }
+
   if (
     card.spellType !== "damage_enemy_unit" &&
-    card.spellType !== "heal_friendly_unit"
+    card.spellType !== "heal_friendly_unit" &&
+    card.spellType !== "buff_friendly_unit"
   ) {
     showMessage(`${card.name} selected. Choose a target.`);
   }
-
   renderGame();
 }
 
@@ -423,7 +437,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   }
 
   if (gameState.selectedSpellCardIndex === null) {
-    showMessage("Select a spell first.");
+    showMessage("Select a move first.");
     return;
   }
 
@@ -444,7 +458,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
 
   if (!canCastDuringAction && !canCastDuringReaction) {
-    showMessage("This spell cannot be played during this phase.");
+    showMessage("This move cannot be played during this phase.");
     return;
   }
 
@@ -454,7 +468,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   }
 
   if (currentPlayer.currentChi < spellCard.cost) {
-    showMessage("Not enough Chi for this spell.");
+    showMessage("Not enough Chi for this move.");
     return;
   }
 
@@ -479,7 +493,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     return;
   }
 
-  showMessage("This spell effect is not implemented yet.");
+  showMessage("This move effect is not implemented yet.");
 }
 
 function castSpellOnFriendlyUnit(friendlyUnitIndex) {
@@ -488,7 +502,7 @@ function castSpellOnFriendlyUnit(friendlyUnitIndex) {
   }
 
   if (gameState.selectedSpellCardIndex === null) {
-    showMessage("Select a spell first.");
+    showMessage("Select a move first.");
     return;
   }
 
@@ -497,7 +511,7 @@ function castSpellOnFriendlyUnit(friendlyUnitIndex) {
   const targetUnit = currentPlayer.board[friendlyUnitIndex];
 
   if (!spellCard || spellCard.type !== "spell") {
-    showMessage("Selected card is not a spell.");
+    showMessage("Selected card is not a move.");
     gameState.selectedSpellCardIndex = null;
     return;
   }
@@ -507,7 +521,7 @@ function castSpellOnFriendlyUnit(friendlyUnitIndex) {
     gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
 
   if (!canCastDuringAction && !canCastDuringReaction) {
-    showMessage("This spell cannot be played during this phase.");
+    showMessage("This move cannot be played during this phase.");
     return;
   }
 
@@ -517,7 +531,7 @@ function castSpellOnFriendlyUnit(friendlyUnitIndex) {
   }
 
   if (currentPlayer.currentChi < spellCard.cost) {
-    showMessage("Not enough Chi for this spell.");
+    showMessage("Not enough Chi for this move.");
     return;
   }
 
@@ -531,7 +545,6 @@ function castSpellOnFriendlyUnit(friendlyUnitIndex) {
     }
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
-
     gameState.selectedSpellCardIndex = null;
 
     showMessage(`${spellCard.name} restored ${spellCard.heal} HP to ${targetUnit.name}.`);
@@ -540,7 +553,25 @@ function castSpellOnFriendlyUnit(friendlyUnitIndex) {
     return;
   }
 
-  showMessage("This spell cannot target a friendly unit.");
+  if (spellCard.spellType === "buff_friendly_unit") {
+    currentPlayer.currentChi -= spellCard.cost;
+
+    targetUnit.attack += spellCard.buff.attack;
+    targetUnit.maxHealth += spellCard.buff.health;
+    targetUnit.currentHealth += spellCard.buff.health;
+
+    currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+    gameState.selectedSpellCardIndex = null;
+
+    showMessage(
+      `${spellCard.name} gave ${targetUnit.name} +${spellCard.buff.attack}/+${spellCard.buff.health}.`
+    );
+
+    renderGame();
+    return;
+  }
+
+  showMessage("This move cannot target a friendly unit.");
 }
 
 function attackEnemyUnit(enemyUnitIndex) {
@@ -579,6 +610,11 @@ function attackEnemyUnit(enemyUnitIndex) {
   if (!attacker.canAttack || attacker.hasAttacked) {
     showMessage(`${attacker.name} cannot attack right now.`);
     gameState.selectedAttackerIndex = null;
+    return;
+  }
+
+  if (playerHasGuardUnit(enemyPlayer) && !hasKeyword(defender, "Guard")) {
+    showMessage("Enemy has a Guard unit. You must attack it first.");
     return;
   }
 
@@ -624,7 +660,7 @@ function attackEnemyHero() {
   }
 
   if (gameState.selectedSpellCardIndex !== null) {
-    showMessage("This spell cannot target the enemy hero.");
+    showMessage("This move cannot target the enemy hero.");
     return;
   }
 
@@ -647,6 +683,11 @@ function attackEnemyHero() {
   if (!attacker.canAttack || attacker.hasAttacked) {
     showMessage(`${attacker.name} cannot attack right now.`);
     gameState.selectedAttackerIndex = null;
+    return;
+  }
+
+  if (playerHasGuardUnit(enemyPlayer)) {
+    showMessage("Enemy has a Guard unit. You must attack it first.");
     return;
   }
 
@@ -720,6 +761,22 @@ function renderGame() {
   renderBoard(enemyPlayer, "enemy-board");
 }
 
+function getCardTypeLabel(type) {
+  if (type === "spell") {
+    return "Move";
+  }
+
+  if (type === "unit") {
+    return "Unit";
+  }
+
+  if (type === "reaction") {
+    return "Reaction";
+  }
+
+  return type;
+}
+
 function renderHand(player) {
   const handElement = document.getElementById("player-hand");
 
@@ -762,20 +819,6 @@ function renderHand(player) {
       `;
     }
 
-    if (card.type === "spell") {
-      if (card.spellType === "damage_enemy_unit") {
-        cardDetails = `
-      <p>Spell: ${card.damage} damage</p>
-    `;
-      }
-
-      if (card.spellType === "heal_friendly_unit") {
-        cardDetails = `
-      <p>Spell: Heal ${card.heal}</p>
-    `;
-      }
-    }
-
     let keywordText = "";
 
     if (card.keywords) {
@@ -797,7 +840,7 @@ function renderHand(player) {
     cardElement.innerHTML = `
       <h4>${card.name}</h4>
       <p>Cost: ${card.cost} Chi</p>
-      <p>Type: ${card.type}</p>
+      <p>Type: ${getCardTypeLabel(card.type)}</p>
       ${cardDetails}
       ${keywordText}
       ${elementText}
@@ -825,13 +868,18 @@ function renderBoard(player, boardId) {
       const selectedSpell = getSelectedSpell();
 
       cardElement.addEventListener("click", function () {
+        const selectedSpell = getSelectedSpell();
+
         if (selectedSpell) {
-          if (selectedSpell.spellType === "heal_friendly_unit") {
+          if (
+            selectedSpell.spellType === "heal_friendly_unit" ||
+            selectedSpell.spellType === "buff_friendly_unit"
+          ) {
             castSpellOnFriendlyUnit(index);
             return;
           }
 
-          showMessage("This spell cannot target a friendly unit.");
+          showMessage("This move cannot target a friendly unit.");
           return;
         }
 
@@ -844,7 +892,10 @@ function renderBoard(player, boardId) {
 
       if (
         selectedSpell &&
-        selectedSpell.spellType === "heal_friendly_unit"
+        (
+          selectedSpell.spellType === "heal_friendly_unit" ||
+          selectedSpell.spellType === "buff_friendly_unit"
+        )
       ) {
         cardElement.classList.add("reaction-target");
       }
@@ -862,7 +913,7 @@ function renderBoard(player, boardId) {
             return;
           }
 
-          showMessage("This spell cannot target an enemy unit.");
+          showMessage("This move cannot target an enemy unit.");
           return;
         }
 
@@ -882,7 +933,7 @@ function renderBoard(player, boardId) {
             return;
           }
 
-          showMessage("This spell cannot target an enemy unit.");
+          showMessage("This move cannot target an enemy unit.");
           return;
         }
 
@@ -900,10 +951,17 @@ function renderBoard(player, boardId) {
     const attackStatus = unit.canAttack && !unit.hasAttacked ? "Ready" : "Exhausted";
     const summonStatus = unit.summonedThisTurn ? "New summon" : "Stable";
 
+    let keywordText = "";
+
+    if (unit.keywords) {
+      keywordText = `<p>Keywords: ${unit.keywords.join(", ")}</p>`;
+    }
+
     cardElement.innerHTML = `
       <h4>${unit.name}</h4>
       <p>Attack: ${unit.attack}</p>
       <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
+      ${keywordText}
       <p>Status: ${attackStatus}</p>
       <p>${summonStatus}</p>
     `;

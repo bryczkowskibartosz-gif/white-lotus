@@ -5,7 +5,7 @@ const cards = [
     element: "Neutral",
     school: "Spirit",
     type: "reaction",
-    cost: 0,
+    cost: 3,
     reactionType: "destroy_summoned_unit",
     text: "Destroy an enemy unit summoned this turn."
   },
@@ -27,10 +27,11 @@ const cards = [
     name: "Flame Adept",
     element: "Fire",
     type: "unit",
+    keywords: ["Ignite"],
     cost: 1,
     attack: 1,
     health: 2,
-    text: "A small aggressive unit."
+    text: "Ignite: Gain +1/+1."
   },
 
   {
@@ -38,10 +39,11 @@ const cards = [
     name: "Stone Guardian",
     element: "Earth",
     type: "unit",
+    keywords: ["Guard"],
     cost: 2,
     attack: 1,
     health: 4,
-    text: "A sturdy defensive unit."
+    text: "Guard."
   },
 
   {
@@ -49,10 +51,23 @@ const cards = [
     name: "Air Acolyte",
     element: "Air",
     type: "unit",
+    keywords: ["Dodge"],
     cost: 2,
     attack: 3,
     health: 1,
-    text: "Fast, but fragile."
+    text: "Dodge."
+  },
+
+  {
+    id: "southern_sailor",
+    name: "Southern Sailor",
+    element: "Water",
+    type: "unit",
+    keywords: ["Swift"],
+    cost: 2,
+    attack: 2,
+    health: 2,
+    text: "Swift."
   },
 
   {
@@ -79,5 +94,66 @@ const cards = [
     spellType: "damage_enemy_unit",
     damage: 1,
     text: "Flow. Deal 1 damage to an enemy unit."
+  },
+
+  {
+    id: "ice_blast",
+    name: "Ice Blast",
+    element: "Water",
+    school: "Waterbending",
+    type: "spell",
+    cost: 2,
+    spellType: "damage_enemy_unit",
+    damage: 2,
+    text: "Deal 2 damage to an enemy unit. It can't attack next turn."
+  },
+
+  {
+    id: "sweeping_strikes",
+    name: "Sweeping Strikes",
+    element: "Air",
+    school: "Airbending",
+    type: "spell",
+    keywords: ["Momentum"],
+    cost: 3,
+    spellType: "damage_enemy_units",
+    damage: 1,
+    text: "Deal 1 damage to all enemy units. Momentum: Do it again."
+  },
+
+  {
+    id: "wind_slice",
+    name: "Wind Slice",
+    element: "Air",
+    school: "Airbending",
+    type: "spell",
+    cost: 3,
+    spellType: "damage_enemy_unit",
+    damage: 2,
+    text: "Choose two enemy units. Deal 2 damage to them."
+  },
+
+  {
+    id: "face_burn",
+    name: "Face Burn",
+    element: "Fire",
+    school: "Firebending",
+    type: "spell",
+    cost: 3,
+    spellType: "damage_enemy_hero",
+    damage: 2,
+    text: "Deal 2 damage to the enemy hero. Ignite: Deal 5 damage instead."
+  },
+
+  {
+    id: "burrow_into_earth",
+    name: "Burrow into Earth",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 2,
+    spellType: "buff_friendly_unit",
+    buff: { attack: 1, health: 3 },
+    text: "Give a friendly unit +1/+3."
   }
 ];
