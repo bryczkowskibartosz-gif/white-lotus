@@ -153,6 +153,28 @@ function isNoTargetSpell(card) {
   );
 }
 
+function selectedSpellTargetsEnemyUnits(card) {
+  return (
+    card &&
+    card.type === "spell" &&
+    (
+      card.spellType === "damage_enemy_unit" ||
+      card.spellType === "damage_two_enemy_units"
+    )
+  );
+}
+
+function selectedSpellTargetsFriendlyUnits(card) {
+  return (
+    card &&
+    card.type === "spell" &&
+    (
+      card.spellType === "heal_friendly_unit" ||
+      card.spellType === "buff_friendly_unit"
+    )
+  );
+}
+
 function addElementClassToCard(cardElement, card) {
   if (card.element) {
     cardElement.classList.add(`${card.element.toLowerCase()}-element`);
@@ -769,15 +791,17 @@ function castNoTargetSpell() {
 
     currentPlayer.currentChi -= spellCard.cost;
 
-    let damage = spellCard.damage;
+    let numberOfHits = 1;
 
     if (hasKeyword(spellCard, "Momentum") && currentPlayer.momentumActive) {
-      damage = spellCard.damage * 2;
+      numberOfHits = 2;
     }
 
-    enemyPlayer.board.forEach(function (unit) {
-      dealDamageToUnit(unit, damage);
-    });
+    for (let hit = 0; hit < numberOfHits; hit++) {
+      enemyPlayer.board.forEach(function (unit) {
+        dealDamageToUnit(unit, spellCard.damage);
+      });
+    }
 
     const destroyedUnits = [];
 
@@ -791,10 +815,10 @@ function castNoTargetSpell() {
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
     gameState.selectedSpellCardIndex = null;
 
-    let message = `${spellCard.name} dealt ${damage} damage to all enemy units.`;
+    let message = `${spellCard.name} dealt ${spellCard.damage} damage to all enemy units.`;
 
     if (hasKeyword(spellCard, "Momentum") && currentPlayer.momentumActive) {
-      message += " Momentum activated!";
+      message += ` Momentum activated: dealt ${spellCard.damage} damage again.`;
     }
 
     if (destroyedUnits.length > 0) {
@@ -1119,6 +1143,26 @@ function renderGame() {
     endTurnButton.textContent = "Pass Reaction";
   }
 
+  const enemyArea = document.querySelector(".enemy");
+
+  if (enemyArea) {
+    enemyArea.classList.remove("valid-hero-target", "blocked-hero-target");
+
+    const selectedSpell = getSelectedSpell();
+
+    if (
+      gameState.phase === "action" &&
+      gameState.selectedAttackerIndex !== null &&
+      !selectedSpell
+    ) {
+      if (playerHasGuardUnit(enemyPlayer)) {
+        enemyArea.classList.add("blocked-hero-target");
+      } else {
+        enemyArea.classList.add("valid-hero-target");
+      }
+    }
+  }
+
   renderHand(currentPlayer);
   renderBoard(currentPlayer, "player-board");
   renderBoard(enemyPlayer, "enemy-board");
@@ -1227,6 +1271,10 @@ function renderBoard(player, boardId) {
     cardElement.classList.add("unit-card");
     addElementClassToCard(cardElement, unit);
 
+    if (hasKeyword(unit, "Guard")) {
+      cardElement.classList.add("guard-unit");
+    }
+
     if (boardId === "player-board") {
       const selectedSpell = getSelectedSpell();
 
@@ -1234,10 +1282,7 @@ function renderBoard(player, boardId) {
         const selectedSpell = getSelectedSpell();
 
         if (selectedSpell) {
-          if (
-            selectedSpell.spellType === "heal_friendly_unit" ||
-            selectedSpell.spellType === "buff_friendly_unit"
-          ) {
+          if (selectedSpellTargetsFriendlyUnits(selectedSpell)) {
             castSpellOnFriendlyUnit(index);
             return;
           }
@@ -1253,14 +1298,8 @@ function renderBoard(player, boardId) {
         cardElement.classList.add("selected-card");
       }
 
-      if (
-        selectedSpell &&
-        (
-          selectedSpell.spellType === "heal_friendly_unit" ||
-          selectedSpell.spellType === "buff_friendly_unit"
-        )
-      ) {
-        cardElement.classList.add("reaction-target");
+      if (selectedSpellTargetsFriendlyUnits(selectedSpell)) {
+        cardElement.classList.add("valid-target");
       }
     }
 
@@ -1276,14 +1315,16 @@ function renderBoard(player, boardId) {
             return;
           }
 
-          if (selectedSpell.spellType === "damage_enemy_unit") {
-            castSpellOnEnemyUnit(index);
-            return;
-          }
+          if (selectedSpellTargetsEnemyUnits(selectedSpell)) {
+            if (selectedSpell.spellType === "damage_enemy_unit") {
+              castSpellOnEnemyUnit(index);
+              return;
+            }
 
-          if (selectedSpell.spellType === "damage_two_enemy_units") {
-            selectWindSliceTarget(index);
-            return;
+            if (selectedSpell.spellType === "damage_two_enemy_units") {
+              selectWindSliceTarget(index);
+              return;
+            }
           }
 
           showMessage("This spell cannot target an enemy unit.");
@@ -1295,14 +1336,20 @@ function renderBoard(player, boardId) {
 
       const selectedSpell = getSelectedSpell();
 
-      if (
-        selectedSpell &&
-        (
-          selectedSpell.spellType === "damage_enemy_unit" ||
-          selectedSpell.spellType === "damage_two_enemy_units"
-        )
-      ) {
-        cardElement.classList.add("reaction-target");
+      if (selectedSpellTargetsEnemyUnits(selectedSpell)) {
+        cardElement.classList.add("valid-target");
+      }
+
+      if (!selectedSpell && gameState.selectedAttackerIndex !== null) {
+        if (playerHasGuardUnit(player)) {
+          if (hasKeyword(unit, "Guard")) {
+            cardElement.classList.add("valid-target");
+          } else {
+            cardElement.classList.add("blocked-target");
+          }
+        } else {
+          cardElement.classList.add("valid-target");
+        }
       }
 
       if (gameState.selectedWindSliceTargets.includes(index)) {
@@ -1317,14 +1364,16 @@ function renderBoard(player, boardId) {
         event.stopPropagation();
 
         if (selectedSpell) {
-          if (selectedSpell.spellType === "damage_enemy_unit") {
-            castSpellOnEnemyUnit(index);
-            return;
-          }
+          if (selectedSpellTargetsEnemyUnits(selectedSpell)) {
+            if (selectedSpell.spellType === "damage_enemy_unit") {
+              castSpellOnEnemyUnit(index);
+              return;
+            }
 
-          if (selectedSpell.spellType === "damage_two_enemy_units") {
-            selectWindSliceTarget(index);
-            return;
+            if (selectedSpell.spellType === "damage_two_enemy_units") {
+              selectWindSliceTarget(index);
+              return;
+            }
           }
 
           showMessage("This move cannot target an enemy unit.");
@@ -1334,17 +1383,19 @@ function renderBoard(player, boardId) {
         playReactionOnEnemyUnit(index);
       });
 
+      if (selectedSpellTargetsEnemyUnits(selectedSpell)) {
+        cardElement.classList.add("valid-target");
+      }
+
       if (
-        unit.summonedThisTurn ||
-        (
-          selectedSpell &&
-          (
-            selectedSpell.spellType === "damage_enemy_unit" ||
-            selectedSpell.spellType === "damage_two_enemy_units"
-          )
-        )
+        !selectedSpell &&
+        gameState.selectedReactionCardIndex !== null
       ) {
-        cardElement.classList.add("reaction-target");
+        if (unit.summonedThisTurn) {
+          cardElement.classList.add("valid-target");
+        } else {
+          cardElement.classList.add("blocked-target");
+        }
       }
 
       if (gameState.selectedWindSliceTargets.includes(index)) {
@@ -1359,12 +1410,18 @@ function renderBoard(player, boardId) {
 
     if (unit.keywords) {
       const visibleKeywords = unit.keywords.filter(function (keyword) {
-        return keyword !== "Dodge";
+        return keyword !== "Dodge" && keyword !== "Guard";
       });
 
       if (visibleKeywords.length > 0) {
         keywordText = `<p>Keywords: ${visibleKeywords.join(", ")}</p>`;
       }
+    }
+
+    let guardText = "";
+
+    if (hasKeyword(unit, "Guard")) {
+      guardText = `<p class="guard-badge">🛡 Guard</p>`;
     }
 
     let dodgeText = "";
@@ -1387,6 +1444,7 @@ function renderBoard(player, boardId) {
       <h4>${unit.name}</h4>
       <p>Attack: ${unit.attack}</p>
       <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
+      ${guardText}
       ${keywordText}
       ${dodgeText}
       ${frozenText}

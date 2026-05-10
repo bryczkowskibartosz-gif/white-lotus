@@ -38,18 +38,6 @@ Damage resolves immediately.
 Dead units are removed before Reaction Phase.
 Reaction cards can only affect units that survived the Action Phase.
 
-Latest update:
-- Added element/school distinction.
-- Element represents class/deck identity: Fire, Water, Earth, Air, Neutral.
-- School represents technique/theme, e.g. Spirit, Waterbending, Firebending.
-- School currently has no mechanical effect.
-- Added visual clarity:
-  - card type is represented by background color
-  - element is represented by thick border color
-  - school is shown as text only
-- Added neutral element support.
-- Hand and board cards now both show type + element visually.
-
 Current visual rules:
 - Unit = beige background
 - Spell = pink/red background
@@ -68,18 +56,12 @@ Implemented:
 - Ignite: bonus activates if you damaged the enemy hero earlier this turn. Ignite does not activate from the same card's damage.
 - damage_enemy_hero moves auto-cast without target selection.
 
+Latest update:
+- Implemented Ice Blast: damages an enemy unit and prevents its next attack.
+- Implemented Wind Slice: selects two enemy units and deals damage to both.
+- Sweeping Strikes works as an AoE move and supports Momentum.
+
 Next steps:
-1. Implement Momentum keyword
-- Momentum: bonus activates if you played a reaction card during your last Reaction Phase.
-- Track whether player played a reaction card.
-- Use it first on Sweeping Strikes.
-- Test if Momentum resets correctly.
-
-2. Implement remaining move effects
-- Ice Blast: deal damage and prevent a unit from attacking next turn.
-- Sweeping Strikes: deal damage to all enemy units.
-- Wind Slice: choose two enemy units and deal damage to both.
-
 3. Improve combat and targeting clarity
 - Highlight valid targets more clearly.
 - Show why a target cannot be clicked.

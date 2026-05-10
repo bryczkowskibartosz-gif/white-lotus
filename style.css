@@ -145,3 +145,46 @@ button:hover {
   outline: 4px solid #c77dff;
   transform: translateY(-6px);
 }
+
+.valid-target {
+  outline: 4px solid #7CFF8B;
+  box-shadow: 0 0 16px rgba(124, 255, 139, 0.6);
+}
+
+.blocked-target {
+  outline: 4px dashed #ff6b6b;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.multi-target-selected {
+  outline: 4px solid #c77dff;
+  box-shadow: 0 0 16px rgba(199, 125, 255, 0.7);
+  transform: translateY(-6px);
+}
+
+.guard-unit {
+  box-shadow: 0 0 18px rgba(255, 223, 107, 0.75);
+}
+
+.guard-badge {
+  background: #3a2f00;
+  color: #ffdf6b;
+  border: 1px solid #ffdf6b;
+  border-radius: 6px;
+  padding: 3px 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.valid-hero-target {
+  outline: 4px solid #7CFF8B;
+  box-shadow: 0 0 18px rgba(124, 255, 139, 0.6);
+  cursor: pointer;
+}
+
+.blocked-hero-target {
+  outline: 4px dashed #ff6b6b;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
