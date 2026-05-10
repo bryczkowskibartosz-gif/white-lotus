@@ -16,6 +16,8 @@ const gameState = {
       maxChi: 0,
       currentChi: 0,
       damagedEnemyHeroThisTurn: false,
+      playedReactionThisReactionPhase: false,
+      momentumActive: false,
       deck: [],
       hand: [],
       board: []
@@ -26,6 +28,8 @@ const gameState = {
       maxChi: 0,
       currentChi: 0,
       damagedEnemyHeroThisTurn: false,
+      playedReactionThisReactionPhase: false,
+      momentumActive: false,
       deck: [],
       hand: [],
       board: []
@@ -136,6 +140,17 @@ function getSelectedSpell() {
   return currentPlayer.hand[gameState.selectedSpellCardIndex];
 }
 
+function isNoTargetSpell(card) {
+  return (
+    card &&
+    card.type === "spell" &&
+    (
+      card.spellType === "damage_enemy_units" ||
+      card.spellType === "damage_enemy_hero"
+    )
+  );
+}
+
 function addElementClassToCard(cardElement, card) {
   if (card.element) {
     cardElement.classList.add(`${card.element.toLowerCase()}-element`);
@@ -165,6 +180,11 @@ function playCard(cardIndex) {
   }
 
   if (gameState.selectedSpellCardIndex === cardIndex) {
+    if (isNoTargetSpell(card)) {
+      castNoTargetSpell();
+      return;
+    }
+
     clearSelection(`${card.name} selection cancelled.`);
     return;
   }
@@ -195,14 +215,17 @@ function playCard(cardIndex) {
   }
 
   if (card.type === "spell") {
-    if (card.spellType === "damage_enemy_hero") {
-      castSpellOnEnemyHero(cardIndex);
-      return;
-    }
-
     selectSpellCard(cardIndex);
     return;
   }
+
+  if (card.type === "spell") {
+    selectSpellCard(cardIndex);
+    return;
+  }
+
+  gameState.selectedSpellCardIndex = null;
+  gameState.selectedReactionCardIndex = null;
 
   if (card.type !== "unit") {
     showMessage("That card cannot be played right now.");
@@ -276,26 +299,31 @@ function selectSpellCard(cardIndex) {
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = cardIndex;
 
+  if (isNoTargetSpell(card)) {
+    showMessage(`${card.name} selected. Click this card again to confirm.`);
+    renderGame();
+    return;
+  }
+
   if (card.spellType === "damage_enemy_unit") {
     showMessage(`${card.name} selected. Click an enemy unit.`);
+    renderGame();
+    return;
   }
 
   if (card.spellType === "heal_friendly_unit") {
     showMessage(`${card.name} selected. Click one of your units.`);
+    renderGame();
+    return;
   }
 
   if (card.spellType === "buff_friendly_unit") {
     showMessage(`${card.name} selected. Click one of your units.`);
+    renderGame();
+    return;
   }
 
-  if (
-    card.spellType !== "damage_enemy_unit" &&
-    card.spellType !== "heal_friendly_unit" &&
-    card.spellType !== "buff_friendly_unit"
-  ) {
-    showMessage(`${card.name} selected. Choose a target.`);
-  }
-
+  showMessage(`${card.name} selected. Choose a target.`);
   renderGame();
 }
 
@@ -368,6 +396,8 @@ function playReactionOnEnemyUnit(enemyUnitIndex) {
     enemyPlayer.board.splice(enemyUnitIndex, 1);
     reactingPlayer.hand.splice(gameState.selectedReactionCardIndex, 1);
 
+    reactingPlayer.playedReactionThisReactionPhase = true;
+
     showMessage(`${reactionCard.name} destroyed ${targetUnit.name}.`);
 
     gameState.selectedReactionCardIndex = null;
@@ -416,6 +446,9 @@ function startActionPhase() {
 
   clearSummonedThisTurn(previousActionPlayer);
 
+  currentPlayer.momentumActive = currentPlayer.playedReactionThisReactionPhase;
+  currentPlayer.playedReactionThisReactionPhase = false;
+
   gameState.phase = "action";
 
   currentPlayer.damagedEnemyHeroThisTurn = false;
@@ -434,7 +467,13 @@ function startActionPhase() {
   drawCard(currentPlayer);
   prepareUnitsForTurn(currentPlayer);
 
-  showMessage(`${currentPlayer.name}'s Action Phase started.`);
+  let actionPhaseMessage = `${currentPlayer.name}'s Action Phase started.`;
+
+  if (currentPlayer.momentumActive) {
+    actionPhaseMessage += " Momentum is active!";
+  }
+
+  showMessage(actionPhaseMessage);
 
   renderGame();
 }
@@ -493,7 +532,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   }
 
   if (gameState.selectedSpellCardIndex === null) {
-    showMessage("Select a move first.");
+    showMessage("Select a spell first.");
     return;
   }
 
@@ -514,7 +553,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
 
   if (!canCastDuringAction && !canCastDuringReaction) {
-    showMessage("This move cannot be played during this phase.");
+    showMessage("This spell cannot be played during this phase.");
     return;
   }
 
@@ -524,24 +563,18 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   }
 
   if (currentPlayer.currentChi < spellCard.cost) {
-    showMessage("Not enough Chi for this move.");
+    showMessage("Not enough Chi for this spell.");
     return;
   }
 
   if (spellCard.spellType === "damage_enemy_unit") {
     currentPlayer.currentChi -= spellCard.cost;
 
-    const damageResult = dealDamageToUnit(targetUnit, spellCard.damage);
+    targetUnit.currentHealth -= spellCard.damage;
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
 
-    let message = "";
-
-    if (damageResult.wasDodged) {
-      message = `${targetUnit.name} dodged ${spellCard.name}!`;
-    } else {
-      message = `${spellCard.name} dealt ${damageResult.actualDamage} damage to ${targetUnit.name}.`;
-    }
+    let message = `${spellCard.name} dealt ${spellCard.damage} damage to ${targetUnit.name}.`;
 
     if (targetUnit.currentHealth <= 0) {
       enemyPlayer.board.splice(enemyUnitIndex, 1);
@@ -555,25 +588,26 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     return;
   }
 
-  showMessage("This move effect is not implemented yet.");
+  showMessage("This spell cannot target an enemy unit.");
 }
 
-function castSpellOnEnemyHero(cardIndex) {
+function castNoTargetSpell() {
   if (gameState.gameOver) {
+    return;
+  }
+
+  if (gameState.selectedSpellCardIndex === null) {
+    showMessage("Select a spell first.");
     return;
   }
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const enemyPlayer = gameState.players[getEnemyPlayerIndex()];
-  const spellCard = currentPlayer.hand[cardIndex];
 
-  if (!spellCard || spellCard.type !== "spell") {
-    showMessage("Selected card is not a move.");
-    return;
-  }
+  const spellCard = currentPlayer.hand[gameState.selectedSpellCardIndex];
 
-  if (spellCard.spellType !== "damage_enemy_hero") {
-    showMessage("This move cannot target the enemy hero.");
+  if (!isNoTargetSpell(spellCard)) {
+    showMessage("This spell needs a target.");
     return;
   }
 
@@ -582,40 +616,91 @@ function castSpellOnEnemyHero(cardIndex) {
     gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
 
   if (!canCastDuringAction && !canCastDuringReaction) {
-    showMessage("This move cannot be played during this phase.");
+    showMessage("This spell cannot be played during this phase.");
     return;
   }
 
   if (currentPlayer.currentChi < spellCard.cost) {
-    showMessage("Not enough Chi for this move.");
+    showMessage("Not enough Chi for this spell.");
     return;
   }
 
-  const igniteWasActive = isIgniteActive(currentPlayer);
+  if (spellCard.spellType === "damage_enemy_units") {
+    if (enemyPlayer.board.length === 0) {
+      showMessage("No enemy units to hit.");
+      return;
+    }
 
-  let damage = spellCard.damage;
+    currentPlayer.currentChi -= spellCard.cost;
 
-  if (igniteWasActive && spellCard.igniteDamage) {
-    damage = spellCard.igniteDamage;
+    let damage = spellCard.damage;
+
+    if (hasKeyword(spellCard, "Momentum") && currentPlayer.momentumActive) {
+      damage = spellCard.damage * 2;
+    }
+
+    enemyPlayer.board.forEach(function (unit) {
+      unit.currentHealth -= damage;
+    });
+
+    const destroyedUnits = [];
+
+    for (let i = enemyPlayer.board.length - 1; i >= 0; i--) {
+      if (enemyPlayer.board[i].currentHealth <= 0) {
+        destroyedUnits.push(enemyPlayer.board[i].name);
+        enemyPlayer.board.splice(i, 1);
+      }
+    }
+
+    currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+    gameState.selectedSpellCardIndex = null;
+
+    let message = `${spellCard.name} dealt ${damage} damage to all enemy units.`;
+
+    if (hasKeyword(spellCard, "Momentum") && currentPlayer.momentumActive) {
+      message += " Momentum activated!";
+    }
+
+    if (destroyedUnits.length > 0) {
+      message += ` Destroyed: ${destroyedUnits.join(", ")}.`;
+    }
+
+    showMessage(message);
+    renderGame();
+    return;
   }
 
-  currentPlayer.currentChi -= spellCard.cost;
-  enemyPlayer.hp -= damage;
+  if (spellCard.spellType === "damage_enemy_hero") {
+    currentPlayer.currentChi -= spellCard.cost;
 
-  currentPlayer.damagedEnemyHeroThisTurn = true;
+    let damage = spellCard.damage;
 
-  currentPlayer.hand.splice(cardIndex, 1);
+    const igniteWasActive = isIgniteActive(currentPlayer);
 
-  let message = `${spellCard.name} dealt ${damage} damage to ${enemyPlayer.name}.`;
+    if (igniteWasActive && spellCard.igniteDamage) {
+      damage = spellCard.igniteDamage;
+    }
 
-  if (igniteWasActive && spellCard.igniteDamage) {
-    message += " Ignite activated.";
+    enemyPlayer.hp -= damage;
+    currentPlayer.damagedEnemyHeroThisTurn = true;
+
+    currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+    gameState.selectedSpellCardIndex = null;
+
+    let message = `${spellCard.name} dealt ${damage} damage to ${enemyPlayer.name}.`;
+
+    if (igniteWasActive && spellCard.igniteDamage) {
+      message += " Ignite activated.";
+    }
+
+    showMessage(message);
+
+    checkGameOver();
+    renderGame();
+    return;
   }
 
-  showMessage(message);
-
-  checkGameOver();
-  renderGame();
+  showMessage("This no-target spell effect is not implemented yet.");
 }
 
 function castSpellOnFriendlyUnit(friendlyUnitIndex) {
@@ -794,6 +879,13 @@ function attackEnemyHero() {
   }
 
   if (gameState.selectedSpellCardIndex !== null) {
+    const selectedSpell = getSelectedSpell();
+
+    if (isNoTargetSpell(selectedSpell)) {
+      showMessage(`${selectedSpell.name} does not need a target. Click the card again to confirm.`);
+      return;
+    }
+
     showMessage("This move cannot target the enemy hero.");
     return;
   }
@@ -1043,12 +1135,17 @@ function renderBoard(player, boardId) {
         const selectedSpell = getSelectedSpell();
 
         if (selectedSpell) {
+          if (isNoTargetSpell(selectedSpell)) {
+            showMessage(`${selectedSpell.name} does not need a target. Click the card again to confirm.`);
+            return;
+          }
+
           if (selectedSpell.spellType === "damage_enemy_unit") {
             castSpellOnEnemyUnit(index);
             return;
           }
 
-          showMessage("This move cannot target an enemy unit.");
+          showMessage("This spell cannot target an enemy unit.");
           return;
         }
 
