@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +9,7 @@
 
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <h1>The White Lotus</h1>
 
@@ -16,6 +18,7 @@
       <h2 id="enemy-name">Player 2</h2>
       <p>HP: <span id="enemy-hp">30</span></p>
       <p>Chi: <span id="enemy-chi">0</span>/<span id="enemy-max-chi">0</span></p>
+      <p>Deck: <span id="enemy-deck-count">0</span> | Hand: <span id="enemy-hand-count">0</span></p>
 
       <h3>Enemy board</h3>
       <div id="enemy-board" class="board"></div>
@@ -24,24 +27,29 @@
     <hr />
 
     <section class="player-area current">
-<h2 id="player-name">Player 1</h2>
-<p>HP: <span id="player-hp">30</span></p>
-<p>Chi: <span id="player-chi">0</span>/<span id="player-max-chi">0</span></p>
-<p>Phase: <span id="phase-name">Action Phase</span></p>
+      <h2 id="player-name">Player 1</h2>
+      <p>HP: <span id="player-hp">30</span></p>
+      <p>Chi: <span id="player-chi">0</span>/<span id="player-max-chi">0</span></p>
+      <p>Deck: <span id="player-deck-count">0</span> | Hand: <span id="player-hand-count">0</span></p>
+      <p>Phase: <span id="phase-name">Action Phase</span></p>
 
-<h3>Your board</h3>
-<div id="player-board" class="board"></div>
+      <h3>Your board</h3>
+      <div id="player-board" class="board"></div>
 
-<p id="game-message"></p>
+      <p id="game-message"></p>
 
-<h3>Your hand</h3>
-<div id="player-hand" class="hand"></div>
+      <h3>Your hand</h3>
+      <div id="player-hand" class="hand"></div>
 
-      <button id="end-turn-button">End Turn</button>
+      <div class="button-row">
+        <button id="end-turn-button">End Turn</button>
+        <button id="restart-button">Restart Game</button>
+      </div>
     </section>
   </div>
 
   <script src="cards.js"></script>
   <script src="main.js"></script>
 </body>
+
 </html>

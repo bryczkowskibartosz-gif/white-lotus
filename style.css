@@ -188,3 +188,13 @@ button:hover {
   opacity: 0.75;
   cursor: not-allowed;
 }
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#restart-button {
+  background: #d6ecff;
+}

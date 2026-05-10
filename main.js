@@ -1,5 +1,6 @@
 const TEST_MODE = true;
 const MAX_BOARD_SIZE = 5;
+const MAX_HAND_SIZE = 10;
 
 const gameState = {
   currentPlayerIndex: 0,
@@ -38,7 +39,35 @@ const gameState = {
   ]
 };
 
+function resetPlayer(player) {
+  player.hp = 30;
+  player.maxChi = 0;
+  player.currentChi = 0;
+  player.damagedEnemyHeroThisTurn = false;
+  player.playedReactionThisReactionPhase = false;
+  player.momentumActive = false;
+  player.deck = [];
+  player.hand = [];
+  player.board = [];
+}
+
+function resetGameState() {
+  gameState.currentPlayerIndex = 0;
+  gameState.phase = "action";
+  gameState.selectedAttackerIndex = null;
+  gameState.selectedReactionCardIndex = null;
+  gameState.selectedSpellCardIndex = null;
+  gameState.selectedWindSliceTargets = [];
+  gameState.gameOver = false;
+
+  gameState.players.forEach(function (player) {
+    resetPlayer(player);
+  });
+}
+
 function startGame() {
+  resetGameState();
+
   const player1 = gameState.players[0];
   const player2 = gameState.players[1];
 
@@ -48,8 +77,13 @@ function startGame() {
   const startingHandSize = TEST_MODE ? cards.length : 3;
 
   for (let i = 0; i < startingHandSize; i++) {
-    drawCard(player1);
-    drawCard(player2);
+    if (TEST_MODE) {
+      drawStartingCard(player1);
+      drawStartingCard(player2);
+    } else {
+      drawCard(player1);
+      drawCard(player2);
+    }
   }
 
   if (TEST_MODE) {
@@ -72,6 +106,34 @@ function startGame() {
 }
 
 function drawCard(player) {
+  const card = player.deck.shift();
+
+  if (!card) {
+    return {
+      drewCard: false,
+      burnedCard: false,
+      cardName: null
+    };
+  }
+
+  if (player.hand.length >= MAX_HAND_SIZE) {
+    return {
+      drewCard: false,
+      burnedCard: true,
+      cardName: card.name
+    };
+  }
+
+  player.hand.push(card);
+
+  return {
+    drewCard: true,
+    burnedCard: false,
+    cardName: card.name
+  };
+}
+
+function drawStartingCard(player) {
   const card = player.deck.shift();
 
   if (card) {
@@ -235,11 +297,6 @@ function playCard(cardIndex) {
 
   if (gameState.phase !== "action") {
     showMessage("You can only play normal cards during Action Phase.");
-    return;
-  }
-
-  if (card.type === "spell") {
-    selectSpellCard(cardIndex);
     return;
   }
 
@@ -499,10 +556,18 @@ function startActionPhase() {
     currentPlayer.currentChi = currentPlayer.maxChi;
   }
 
-  drawCard(currentPlayer);
+  const drawResult = drawCard(currentPlayer);
   prepareUnitsForTurn(currentPlayer);
 
   let actionPhaseMessage = `${currentPlayer.name}'s Action Phase started.`;
+
+  if (drawResult.burnedCard) {
+    actionPhaseMessage += ` Hand is full, ${drawResult.cardName} was burned.`;
+  }
+
+  if (!drawResult.drewCard && !drawResult.burnedCard) {
+    actionPhaseMessage += " Deck is empty.";
+  }
 
   if (currentPlayer.momentumActive) {
     actionPhaseMessage += " Momentum is active!";
@@ -1123,11 +1188,15 @@ function renderGame() {
   document.getElementById("player-hp").textContent = currentPlayer.hp;
   document.getElementById("player-chi").textContent = currentPlayer.currentChi;
   document.getElementById("player-max-chi").textContent = currentPlayer.maxChi;
+  document.getElementById("player-deck-count").textContent = currentPlayer.deck.length;
+  document.getElementById("player-hand-count").textContent = currentPlayer.hand.length;
 
   document.getElementById("enemy-name").textContent = enemyPlayer.name;
   document.getElementById("enemy-hp").textContent = enemyPlayer.hp;
   document.getElementById("enemy-chi").textContent = enemyPlayer.currentChi;
   document.getElementById("enemy-max-chi").textContent = enemyPlayer.maxChi;
+  document.getElementById("enemy-deck-count").textContent = enemyPlayer.deck.length;
+  document.getElementById("enemy-hand-count").textContent = enemyPlayer.hand.length;
 
   const phaseElement = document.getElementById("phase-name");
 
@@ -1457,6 +1526,7 @@ function renderBoard(player, boardId) {
 }
 
 document.getElementById("end-turn-button").addEventListener("click", endTurn);
+document.getElementById("restart-button").addEventListener("click", startGame);
 document.querySelector(".enemy").addEventListener("click", attackEnemyHero);
 
 startGame();
