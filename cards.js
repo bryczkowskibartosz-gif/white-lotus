@@ -107,6 +107,7 @@ const cards = [
     cost: 2,
     spellType: "damage_enemy_unit",
     damage: 2,
+    preventsNextAttack: true,
     text: "Deal 2 damage to an enemy unit. It can't attack next turn."
   },
 
@@ -130,7 +131,7 @@ const cards = [
     school: "Airbending",
     type: "spell",
     cost: 3,
-    spellType: "damage_enemy_unit",
+    spellType: "damage_two_enemy_units",
     damage: 2,
     text: "Choose two enemy units. Deal 2 damage to them."
   },

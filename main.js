@@ -7,6 +7,7 @@ const gameState = {
   selectedAttackerIndex: null,
   selectedReactionCardIndex: null,
   selectedSpellCardIndex: null,
+  selectedWindSliceTargets: [],
   gameOver: false,
 
   players: [
@@ -87,6 +88,7 @@ function clearSelection(message) {
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
+  gameState.selectedWindSliceTargets = [];
 
   showMessage(message);
   renderGame();
@@ -267,7 +269,9 @@ function playCard(cardIndex) {
     canAttack: hasKeyword(card, "Swift"),
     hasAttacked: false,
     summonedThisTurn: true,
-    dodgeUsed: false
+    dodgeUsed: false,
+    skipNextAttack: false,
+    frozenThisTurn: false
   };
 
   currentPlayer.board.push(unit);
@@ -298,6 +302,7 @@ function selectSpellCard(cardIndex) {
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = cardIndex;
+  gameState.selectedWindSliceTargets = [];
 
   if (isNoTargetSpell(card)) {
     showMessage(`${card.name} selected. Click this card again to confirm.`);
@@ -307,6 +312,12 @@ function selectSpellCard(cardIndex) {
 
   if (card.spellType === "damage_enemy_unit") {
     showMessage(`${card.name} selected. Click an enemy unit.`);
+    renderGame();
+    return;
+  }
+
+  if (card.spellType === "damage_two_enemy_units") {
+    showMessage(`${card.name} selected. Click the first enemy unit.`);
     renderGame();
     return;
   }
@@ -425,6 +436,7 @@ function startReactionPhase() {
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
+  gameState.selectedWindSliceTargets = [];
 
   gameState.currentPlayerIndex = getEnemyPlayerIndex();
   gameState.phase = "reaction";
@@ -440,6 +452,7 @@ function startActionPhase() {
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
+  gameState.selectedWindSliceTargets = [];
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const previousActionPlayer = gameState.players[getEnemyPlayerIndex()];
@@ -486,8 +499,17 @@ function clearSummonedThisTurn(player) {
 
 function prepareUnitsForTurn(player) {
   player.board.forEach(function (unit) {
+    if (unit.skipNextAttack) {
+      unit.canAttack = false;
+      unit.hasAttacked = true;
+      unit.skipNextAttack = false;
+      unit.frozenThisTurn = true;
+      return;
+    }
+
     unit.canAttack = true;
     unit.hasAttacked = false;
+    unit.frozenThisTurn = false;
   });
 }
 
@@ -570,11 +592,22 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   if (spellCard.spellType === "damage_enemy_unit") {
     currentPlayer.currentChi -= spellCard.cost;
 
-    targetUnit.currentHealth -= spellCard.damage;
+    const damageResult = dealDamageToUnit(targetUnit, spellCard.damage);
+
+    let message = "";
+
+    if (damageResult.wasDodged) {
+      message = `${targetUnit.name} dodged ${spellCard.name}.`;
+    } else {
+      message = `${spellCard.name} dealt ${damageResult.actualDamage} damage to ${targetUnit.name}.`;
+    }
+
+    if (spellCard.preventsNextAttack && targetUnit.currentHealth > 0) {
+      targetUnit.skipNextAttack = true;
+      message += ` ${targetUnit.name} can't attack next turn.`;
+    }
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
-
-    let message = `${spellCard.name} dealt ${spellCard.damage} damage to ${targetUnit.name}.`;
 
     if (targetUnit.currentHealth <= 0) {
       enemyPlayer.board.splice(enemyUnitIndex, 1);
@@ -582,6 +615,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     }
 
     gameState.selectedSpellCardIndex = null;
+    gameState.selectedWindSliceTargets = [];
 
     showMessage(message);
     renderGame();
@@ -589,6 +623,108 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
   }
 
   showMessage("This spell cannot target an enemy unit.");
+}
+
+function selectWindSliceTarget(enemyUnitIndex) {
+  if (gameState.gameOver) {
+    return;
+  }
+
+  if (gameState.selectedSpellCardIndex === null) {
+    showMessage("Select Wind Slice first.");
+    return;
+  }
+
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const enemyPlayer = gameState.players[getEnemyPlayerIndex()];
+
+  const spellCard = currentPlayer.hand[gameState.selectedSpellCardIndex];
+  const targetUnit = enemyPlayer.board[enemyUnitIndex];
+
+  if (!spellCard || spellCard.spellType !== "damage_two_enemy_units") {
+    showMessage("Selected move does not choose two targets.");
+    return;
+  }
+
+  const canCastDuringAction = gameState.phase === "action";
+  const canCastDuringReaction =
+    gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
+
+  if (!canCastDuringAction && !canCastDuringReaction) {
+    showMessage("This move cannot be played during this phase.");
+    return;
+  }
+
+  if (enemyPlayer.board.length < 2) {
+    showMessage(`${spellCard.name} needs at least two enemy units.`);
+    return;
+  }
+
+  if (!targetUnit) {
+    showMessage("No target found.");
+    return;
+  }
+
+  if (currentPlayer.currentChi < spellCard.cost) {
+    showMessage("Not enough Chi for this move.");
+    return;
+  }
+
+  if (gameState.selectedWindSliceTargets.includes(enemyUnitIndex)) {
+    showMessage("You already selected that unit. Choose a different one.");
+    return;
+  }
+
+  gameState.selectedWindSliceTargets.push(enemyUnitIndex);
+
+  if (gameState.selectedWindSliceTargets.length === 1) {
+    showMessage(`${targetUnit.name} selected. Choose one more enemy unit.`);
+    renderGame();
+    return;
+  }
+
+  currentPlayer.currentChi -= spellCard.cost;
+
+  const hitMessages = [];
+
+  gameState.selectedWindSliceTargets.forEach(function (targetIndex) {
+    const unit = enemyPlayer.board[targetIndex];
+
+    if (!unit) {
+      return;
+    }
+
+    const damageResult = dealDamageToUnit(unit, spellCard.damage);
+
+    if (damageResult.wasDodged) {
+      hitMessages.push(`${unit.name} dodged`);
+    } else {
+      hitMessages.push(`${unit.name} took ${damageResult.actualDamage}`);
+    }
+  });
+
+  const destroyedUnits = [];
+
+  for (let i = enemyPlayer.board.length - 1; i >= 0; i--) {
+    if (enemyPlayer.board[i].currentHealth <= 0) {
+      destroyedUnits.push(enemyPlayer.board[i].name);
+      enemyPlayer.board.splice(i, 1);
+    }
+  }
+
+  currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+
+  gameState.selectedSpellCardIndex = null;
+  gameState.selectedWindSliceTargets = [];
+
+  let message = `${spellCard.name}: ${hitMessages.join(", ")}.`;
+
+  if (destroyedUnits.length > 0) {
+    message += ` Destroyed: ${destroyedUnits.join(", ")}.`;
+  }
+
+  showMessage(message);
+  renderGame();
 }
 
 function castNoTargetSpell() {
@@ -640,7 +776,7 @@ function castNoTargetSpell() {
     }
 
     enemyPlayer.board.forEach(function (unit) {
-      unit.currentHealth -= damage;
+      dealDamageToUnit(unit, damage);
     });
 
     const destroyedUnits = [];
@@ -1145,12 +1281,33 @@ function renderBoard(player, boardId) {
             return;
           }
 
+          if (selectedSpell.spellType === "damage_two_enemy_units") {
+            selectWindSliceTarget(index);
+            return;
+          }
+
           showMessage("This spell cannot target an enemy unit.");
           return;
         }
 
         attackEnemyUnit(index);
       });
+
+      const selectedSpell = getSelectedSpell();
+
+      if (
+        selectedSpell &&
+        (
+          selectedSpell.spellType === "damage_enemy_unit" ||
+          selectedSpell.spellType === "damage_two_enemy_units"
+        )
+      ) {
+        cardElement.classList.add("reaction-target");
+      }
+
+      if (gameState.selectedWindSliceTargets.includes(index)) {
+        cardElement.classList.add("multi-target-selected");
+      }
     }
 
     if (boardId === "enemy-board" && gameState.phase === "reaction") {
@@ -1165,6 +1322,11 @@ function renderBoard(player, boardId) {
             return;
           }
 
+          if (selectedSpell.spellType === "damage_two_enemy_units") {
+            selectWindSliceTarget(index);
+            return;
+          }
+
           showMessage("This move cannot target an enemy unit.");
           return;
         }
@@ -1174,9 +1336,19 @@ function renderBoard(player, boardId) {
 
       if (
         unit.summonedThisTurn ||
-        (selectedSpell && selectedSpell.spellType === "damage_enemy_unit")
+        (
+          selectedSpell &&
+          (
+            selectedSpell.spellType === "damage_enemy_unit" ||
+            selectedSpell.spellType === "damage_two_enemy_units"
+          )
+        )
       ) {
         cardElement.classList.add("reaction-target");
+      }
+
+      if (gameState.selectedWindSliceTargets.includes(index)) {
+        cardElement.classList.add("multi-target-selected");
       }
     }
 
@@ -1201,15 +1373,26 @@ function renderBoard(player, boardId) {
       dodgeText = `<p>Dodge: ${unit.dodgeUsed ? "Used" : "Ready"}</p>`;
     }
 
+    let frozenText = "";
+
+    if (unit.skipNextAttack) {
+      frozenText = `<p>Frozen: next attack skipped</p>`;
+    }
+
+    if (unit.frozenThisTurn) {
+      frozenText = `<p>Frozen this turn</p>`;
+    }
+
     cardElement.innerHTML = `
-  <h4>${unit.name}</h4>
-  <p>Attack: ${unit.attack}</p>
-  <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
-  ${keywordText}
-  ${dodgeText}
-  <p>Status: ${attackStatus}</p>
-  <p>${summonStatus}</p>
-`;
+      <h4>${unit.name}</h4>
+      <p>Attack: ${unit.attack}</p>
+      <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
+      ${keywordText}
+      ${dodgeText}
+      ${frozenText}
+      <p>Status: ${attackStatus}</p>
+      <p>${summonStatus}</p>
+    `;
 
     boardElement.appendChild(cardElement);
   });

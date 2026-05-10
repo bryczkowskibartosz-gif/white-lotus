@@ -140,3 +140,8 @@ button:hover {
 .neutral-element {
   border: 5px solid #9e9e9e;
 }
+
+.multi-target-selected {
+  outline: 4px solid #c77dff;
+  transform: translateY(-6px);
+}
