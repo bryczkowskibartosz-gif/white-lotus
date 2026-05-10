@@ -54,26 +54,34 @@ Implemented:
 - Guard: enemy attacks must target Guard units first.
 - Dodge: prevents the first damage instance dealt to this unit.
 - Ignite: bonus activates if you damaged the enemy hero earlier this turn. Ignite does not activate from the same card's damage.
+- Momentum: bonus activates if you played a reaction card during your last Reaction Phase.
+- Flow: spell can be played during both Action Phase and Reaction Phase.
+- Ice Blast: damages an enemy unit and prevents its next attack.
+- Sweeping Strikes: deals damage to all enemy units. Momentum repeats the damage as a second damage instance.
+- Wind Slice: selects two enemy units and deals damage to both.
 - damage_enemy_hero moves auto-cast without target selection.
+- Valid target highlights.
+- Blocked target highlights.
+- Guard visual indicator.
+- Selected card visual feedback.
+- Restart game button.
+- Deck and hand counters.
+- Max hand size: 10.
+- Drawing with full hand burns the drawn card.
+- Basic win screen.
+- Fatigue: drawing from an empty deck deals increasing damage.
 
 Latest update:
-- Implemented Ice Blast: damages an enemy unit and prevents its next attack.
-- Implemented Wind Slice: selects two enemy units and deals damage to both.
-- Sweeping Strikes works as an AoE move and supports Momentum.
+- Added basic game flow polish.
+- Added restart button.
+- Added deck and hand counters.
+- Added max hand size: 10.
+- Drawing with full hand burns the drawn card.
+- Added basic win screen with restart button.
+- Added fatigue damage when drawing from an empty deck.
+- Fatigue damage increases by 1 each time that player draws from an empty deck.
 
 Next steps:
-3. Improve combat and targeting clarity
-- Highlight valid targets more clearly.
-- Show why a target cannot be clicked.
-- Improve Guard visual indicator.
-- Improve selected card visual feedback.
-
-4. Add basic deck/game flow polish
-- Add restart game button.
-- Add deck size display.
-- Add hand size maybe later.
-- Add simple win screen instead of only message text.
-
 5. Balance pass
 - Test each element against the others:
   Fire vs Earth

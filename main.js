@@ -17,6 +17,7 @@ const gameState = {
       hp: 30,
       maxChi: 0,
       currentChi: 0,
+      fatigueDamage: 0,
       damagedEnemyHeroThisTurn: false,
       playedReactionThisReactionPhase: false,
       momentumActive: false,
@@ -24,11 +25,13 @@ const gameState = {
       hand: [],
       board: []
     },
+
     {
       name: "Player 2",
       hp: 30,
       maxChi: 0,
       currentChi: 0,
+      fatigueDamage: 0,
       damagedEnemyHeroThisTurn: false,
       playedReactionThisReactionPhase: false,
       momentumActive: false,
@@ -49,6 +52,7 @@ function resetPlayer(player) {
   player.deck = [];
   player.hand = [];
   player.board = [];
+  player.fatigueDamage = 0;
 }
 
 function resetGameState() {
@@ -67,6 +71,7 @@ function resetGameState() {
 
 function startGame() {
   resetGameState();
+  hideWinScreen();
 
   const player1 = gameState.players[0];
   const player2 = gameState.players[1];
@@ -109,9 +114,13 @@ function drawCard(player) {
   const card = player.deck.shift();
 
   if (!card) {
+    player.fatigueDamage += 1;
+    player.hp -= player.fatigueDamage;
+
     return {
       drewCard: false,
       burnedCard: false,
+      fatigueDamage: player.fatigueDamage,
       cardName: null
     };
   }
@@ -120,7 +129,8 @@ function drawCard(player) {
     return {
       drewCard: false,
       burnedCard: true,
-      cardName: card.name
+      cardName: card.name,
+      fatigueDamage: 0
     };
   }
 
@@ -129,7 +139,8 @@ function drawCard(player) {
   return {
     drewCard: true,
     burnedCard: false,
-    cardName: card.name
+    cardName: card.name,
+    fatigueDamage: 0
   };
 }
 
@@ -144,6 +155,28 @@ function drawStartingCard(player) {
 function showMessage(message) {
   const messageElement = document.getElementById("game-message");
   messageElement.textContent = message;
+}
+
+function showWinScreen(winnerName) {
+  const winScreen = document.getElementById("win-screen");
+  const winTitle = document.getElementById("win-title");
+
+  if (!winScreen || !winTitle) {
+    return;
+  }
+
+  winTitle.textContent = `${winnerName} wins!`;
+  winScreen.classList.remove("hidden");
+}
+
+function hideWinScreen() {
+  const winScreen = document.getElementById("win-screen");
+
+  if (!winScreen) {
+    return;
+  }
+
+  winScreen.classList.add("hidden");
 }
 
 function clearSelection(message) {
@@ -565,12 +598,27 @@ function startActionPhase() {
     actionPhaseMessage += ` Hand is full, ${drawResult.cardName} was burned.`;
   }
 
-  if (!drawResult.drewCard && !drawResult.burnedCard) {
+  if (drawResult.fatigueDamage > 0) {
+    actionPhaseMessage += ` Deck is empty. ${currentPlayer.name} takes ${drawResult.fatigueDamage} fatigue damage.`;
+  }
+
+  if (
+    !drawResult.drewCard &&
+    !drawResult.burnedCard &&
+    drawResult.fatigueDamage === 0
+  ) {
     actionPhaseMessage += " Deck is empty.";
   }
 
   if (currentPlayer.momentumActive) {
     actionPhaseMessage += " Momentum is active!";
+  }
+
+  checkGameOver();
+
+  if (gameState.gameOver) {
+    renderGame();
+    return;
   }
 
   showMessage(actionPhaseMessage);
@@ -1164,11 +1212,15 @@ function checkGameOver() {
   if (player1.hp <= 0) {
     gameState.gameOver = true;
     showMessage("Player 2 wins!");
+    showWinScreen("Player 2");
+    return;
   }
 
   if (player2.hp <= 0) {
     gameState.gameOver = true;
     showMessage("Player 1 wins!");
+    showWinScreen("Player 1");
+    return;
   }
 }
 
@@ -1527,6 +1579,7 @@ function renderBoard(player, boardId) {
 
 document.getElementById("end-turn-button").addEventListener("click", endTurn);
 document.getElementById("restart-button").addEventListener("click", startGame);
+document.getElementById("win-restart-button").addEventListener("click", startGame);
 document.querySelector(".enemy").addEventListener("click", attackEnemyHero);
 
 startGame();
