@@ -2,26 +2,20 @@ Current working version:
 - TEST_MODE true
 - 5 unit board limit
 - Action Phase / Reaction Phase
+- Shared Chi system
 - Lotus Seal reaction card works
 - Ember Strike spell works
 - Units can attack hero
 - Units can attack enemy units
 - Dead units are removed
+- Restart game button
+- Deck and hand counters
+- Max hand size: 10
+- Drawing with full hand burns the drawn card
+- Basic win screen
+- Fatigue: drawing from an empty deck deals increasing damage
 
-Reaction card balance:
-Reaction cards should usually cost 0–2 Chi.
-They can be stronger than normal cards only when their condition is narrow.
-Flow cards should be slightly weaker than pure Reaction cards because they can be played in both Action Phase and Reaction Phase.
-
-A card with Flow can be played during both Action Phase and Reaction Phase.
-Flow cards should usually be flexible, defensive or adaptive effects.
-Flow should mostly belong to Water.
-A flow card should have at least one of these reasons to play it in the Reaction Phase:
-- uses leftover Chi before refreshing,
-- saves/finishes a unit before the next turn,
-- has a bonus if played in the Reaction Phase,
-- targets units with summonedThisTurn,
-- protects against future turn start effects.
+Core rules:
 
 Chi rule:
 Each player has one Chi pool.
@@ -30,7 +24,7 @@ Unspent Chi can be used during that player's next Reaction Phase.
 Reaction cards spend the same Chi as normal cards.
 
 Summoning rule:
-Units summoned during Action Phase or Reaction Phase cannot attack until the player's next Action Phase, unless the card has a special keyword
+Units summoned during Action Phase or Reaction Phase cannot attack until the player's next Action Phase, unless the card has a special keyword.
 
 Current Reaction Phase rule:
 Reactions do not interrupt attacks or spells.
@@ -38,17 +32,27 @@ Damage resolves immediately.
 Dead units are removed before Reaction Phase.
 Reaction cards can only affect units that survived the Action Phase.
 
+Hand and deck rules:
+Max hand size is 10.
+If a player draws with a full hand, the drawn card is burned.
+If a player draws from an empty deck, that player takes fatigue damage.
+Fatigue damage starts at 1 and increases by 1 each time that player draws from an empty deck.
+
 Current visual rules:
 - Unit = beige background
-- Spell = pink/red background
+- Spell / Move = pink/red background
 - Reaction = light blue background
 - Fire = red border
 - Water = dark blue border
 - Earth = earthy green border
 - Air = cream/yellow border
 - Neutral = gray border
+- Guard = visible badge and glow
+- Valid targets = green highlight
+- Blocked targets = red dashed highlight
+- Selected cards = visible outline
 
-Implemented:
+Implemented mechanics:
 - Swift: unit can attack the turn it is played.
 - Buff: move can give stats to a friendly unit.
 - Guard: enemy attacks must target Guard units first.
@@ -69,37 +73,109 @@ Implemented:
 - Max hand size: 10.
 - Drawing with full hand burns the drawn card.
 - Basic win screen.
-- Fatigue: drawing from an empty deck deals increasing damage.
+- Fatigue damage.
 
-Latest update:
-- Added basic game flow polish.
-- Added restart button.
-- Added deck and hand counters.
-- Added max hand size: 10.
-- Drawing with full hand burns the drawn card.
-- Added basic win screen with restart button.
-- Added fatigue damage when drawing from an empty deck.
-- Fatigue damage increases by 1 each time that player draws from an empty deck.
+Reaction card balance notes:
+Reaction cards should usually cost 0–2 Chi.
+They can be stronger than normal cards only when their condition is narrow.
+Flow cards should be slightly weaker than pure Reaction cards because they can be played in both Action Phase and Reaction Phase.
+3+ Chi reactions should be rare and should feel like big swing cards.
+
+Flow design notes:
+A card with Flow can be played during both Action Phase and Reaction Phase.
+Flow cards should usually be flexible, defensive or adaptive effects.
+Flow should mostly belong to Water.
+A Flow card should have at least one of these reasons to play it in the Reaction Phase:
+- uses leftover Chi before refreshing,
+- saves or finishes a unit before the next turn,
+- has a bonus if played in the Reaction Phase,
+- targets units with summonedThisTurn,
+- protects against future turn start effects.
+
+Element identity:
+
+Fire:
+- Aggressive.
+- Strong Action Phase.
+- Direct damage.
+- High attack, lower health.
+- Wants to damage the enemy hero.
+- Uses Ignite.
+
+Air:
+- Trickster / tempo element.
+- Uses reactions.
+- Uses Momentum.
+- Dodges, exhausts, bounces or disrupts.
+- Needs more Air reaction cards soon.
+
+Earth:
+- Defensive.
+- High health.
+- Guard units.
+- Buffs and stabilizes the board.
+- Needs more cards soon.
+
+Water:
+- Flexible and adaptive.
+- Uses Flow.
+- Healing, small damage, protection and recovery.
+- Should be useful in both Action Phase and Reaction Phase.
+
+Important design note:
+Do not do a full balance pass yet.
+The current card pool is too small for real element-vs-element testing.
+For now, only do a mini balance sanity check:
+- Is any card completely useless?
+- Is any card obviously too strong?
+- Is any keyword impossible to activate?
+- Does the mechanic feel understandable?
+
+Current balance watchlist:
+- Lotus Seal costs 3 Chi, which may be expensive for a reaction card.
+- Momentum works, but Air needs more reaction cards to support it.
+- Earth has too few cards to test its identity properly.
+- Fire has some Ignite support, but needs more aggressive options.
+- Water currently has the clearest identity because Flow already has multiple cards.
 
 Next steps:
-5. Balance pass
-- Test each element against the others:
-  Fire vs Earth
-  Fire vs Water
-  Air vs Earth
-  Water vs Air
-- Adjust costs, attack, health and damage.
-- Make sure no keyword feels useless or too strong.
 
-6. Add more cards after mechanics are stable
-- More Fire Ignite cards.
-- More Air Momentum/reaction cards.
-- More Earth Guard/buff cards.
-- More Water Flow/heal/adapt cards.
-- Add a few Neutral cards.
+5. Mini balance sanity check
+- Do not do full balance yet.
+- Check only if any card is obviously too weak, too strong, or useless.
+- Watch Lotus Seal cost.
+- Watch if Momentum has enough reaction support.
+- Watch if Flow cards feel useful in both phases.
 
-7. Later MVP goals
-- Build small fixed decks for Player 1 and Player 2.
+6. Expand small card pool
+- Add 2 Fire cards.
+- Add 2 Air cards, including at least 1 Air reaction.
+- Add 2 Earth cards.
+- Add 1 Water card.
+- Add 1 Neutral card.
+- Prefer effects already supported by main.js.
+
+7. Add first Air reaction card
+Goal:
+Give Air a cheap reaction card so Momentum can be activated more naturally.
+
+Simple possible idea:
+Slipstream Step
+Air / Reaction / 1 Chi
+Effect idea: disrupt, dodge, freeze, or protect a unit.
+
+Important:
+Start with a very simple effect.
+Do not create complicated stack/interrupt logic yet.
+
+8. Build small fixed decks
+- Create simple 15-card test decks for Player 1 and Player 2.
+- Use duplicates.
+- Test real game flow with normal Chi and normal draw.
+- Then start proper balance pass.
+
+9. Later MVP goals
 - Add simple enemy AI or hot-seat 2 player mode.
 - Add better card layout and visual clarity.
 - Add basic menu: Start Game / Restart / Rules.
+- Add more original card names and lore text.

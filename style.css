@@ -141,11 +141,6 @@ button:hover {
   border: 5px solid #9e9e9e;
 }
 
-.multi-target-selected {
-  outline: 4px solid #c77dff;
-  transform: translateY(-6px);
-}
-
 .valid-target {
   outline: 4px solid #7CFF8B;
   box-shadow: 0 0 16px rgba(124, 255, 139, 0.6);
