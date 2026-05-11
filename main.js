@@ -274,7 +274,10 @@ function selectedReactionTargetsFriendlyUnits(card) {
   return (
     card &&
     card.type === "reaction" &&
-    card.reactionType === "give_dodge_to_friendly_unit"
+    (
+      card.reactionType === "give_dodge_to_friendly_unit" ||
+      card.reactionType === "destroy_friendly_unit_draw_cards"
+    )
   );
 }
 
@@ -675,6 +678,51 @@ function playReactionOnFriendlyUnit(friendlyUnitIndex) {
     showMessage(`${reactionCard.name} gave Dodge to ${targetUnit.name}.`);
 
     gameState.selectedReactionCardIndex = null;
+
+    renderGame();
+    return;
+  }
+
+  if (reactionCard.reactionType === "destroy_friendly_unit_draw_cards") {
+    reactingPlayer.currentChi -= reactionCard.cost;
+
+    const destroyedUnitName = targetUnit.name;
+    const drawAmount = reactionCard.drawAmount || 0;
+
+    reactingPlayer.board.splice(friendlyUnitIndex, 1);
+    reactingPlayer.hand.splice(gameState.selectedReactionCardIndex, 1);
+
+    const drawMessages = [];
+
+    for (let i = 0; i < drawAmount; i++) {
+      const drawResult = drawCard(reactingPlayer);
+
+      if (drawResult.drewCard) {
+        drawMessages.push(`drew ${drawResult.cardName}`);
+      }
+
+      if (drawResult.burnedCard) {
+        drawMessages.push(`hand was full, ${drawResult.cardName} was burned`);
+      }
+
+      if (drawResult.fatigueDamage > 0) {
+        drawMessages.push(`took ${drawResult.fatigueDamage} fatigue damage`);
+      }
+    }
+
+    reactingPlayer.playedReactionThisReactionPhase = true;
+
+    gameState.selectedReactionCardIndex = null;
+
+    let message = `${reactionCard.name} destroyed ${destroyedUnitName}.`;
+
+    if (drawMessages.length > 0) {
+      message += ` ${drawMessages.join(", ")}.`;
+    }
+
+    showMessage(message);
+
+    checkGameOver();
 
     renderGame();
     return;

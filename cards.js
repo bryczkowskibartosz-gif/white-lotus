@@ -1,15 +1,32 @@
-const cards = [
+const fireUnits = [
   {
-    id: "lotus_seal",
-    name: "Lotus Seal",
-    element: "Neutral",
-    school: "Spirit",
-    type: "reaction",
-    cost: 3,
-    reactionType: "destroy_summoned_unit",
-    text: "Destroy an enemy unit summoned this turn."
+    id: "flame_adept",
+    name: "Flame Adept",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Ignite"],
+    cost: 1,
+    attack: 1,
+    health: 2,
+    igniteBuff: { attack: 1, health: 1 },
+    text: "Ignite: Gain +1/+1."
   },
 
+  {
+    id: "southern_raider",
+    name: "Southern Raider",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Swift", "Ignite"],
+    cost: 2,
+    attack: 2,
+    health: 1,
+    igniteBuff: { attack: 1, health: 0 },
+    text: "Swift. Ignite: Gain +1 Attack."
+  }
+];
+
+const fireSpells = [
   {
     id: "ember_strike",
     name: "Ember Strike",
@@ -23,43 +40,39 @@ const cards = [
   },
 
   {
-    id: "flame_adept",
-    name: "Flame Adept",
+    id: "face_burn",
+    name: "Face Burn",
     element: "Fire",
     school: "Firebending",
-    type: "unit",
-    keywords: ["Ignite"],
+    type: "spell",
+    cost: 3,
+    spellType: "damage_enemy_hero",
+    damage: 2,
+    igniteDamage: 4,
+    text: "Deal 2 damage to the enemy hero. Ignite: Deal 4 instead."
+  },
+
+  {
+    id: "scorch_mark",
+    name: "Scorch Mark",
+    element: "Fire",
+    school: "Firebending",
+    type: "spell",
     cost: 1,
-    attack: 1,
-    health: 2,
-    igniteBuff: { attack: 1, health: 1 },
-    text: "Ignite: Gain +1/+1."
-  },
+    spellType: "damage_enemy_hero",
+    damage: 1,
+    igniteDamage: 2,
+    text: "Deal 1 damage to the enemy hero. Ignite: Deal 2 instead."
+  }
+];
 
-  {
-    id: "stone_guardian",
-    name: "Stone Guardian",
-    element: "Earth",
-    type: "unit",
-    keywords: ["Guard"],
-    cost: 2,
-    attack: 1,
-    health: 4,
-    text: "Guard."
-  },
+const fireReactions = [];
 
-  {
-    id: "air_acolyte",
-    name: "Air Acolyte",
-    element: "Air",
-    type: "unit",
-    keywords: ["Dodge"],
-    cost: 2,
-    attack: 3,
-    health: 1,
-    text: "Dodge."
-  },
+// --------------------------------------------------
+// Water
+// --------------------------------------------------
 
+const waterUnits = [
   {
     id: "southern_sailor",
     name: "Southern Sailor",
@@ -72,6 +85,19 @@ const cards = [
     text: "Swift."
   },
 
+  {
+    id: "waterbending_initiate",
+    name: "Waterbending Initiate",
+    element: "Water",
+    type: "unit",
+    cost: 2,
+    attack: 1,
+    health: 3,
+    text: "A young Waterbender in training."
+  }
+];
+
+const waterSpells = [
   {
     id: "flowing_touch",
     name: "Flowing Touch",
@@ -109,8 +135,102 @@ const cards = [
     damage: 2,
     preventsNextAttack: true,
     text: "Deal 2 damage to an enemy unit. It can't attack next turn."
+  }
+];
+
+const waterReactions = [];
+
+// --------------------------------------------------
+// Earth
+// --------------------------------------------------
+
+const earthUnits = [
+  {
+    id: "stone_guardian",
+    name: "Stone Guardian",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Guard"],
+    cost: 2,
+    attack: 1,
+    health: 4,
+    text: "Guard."
   },
 
+  {
+    id: "pebble_catcher",
+    name: "Pebble Catcher",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Fortify"],
+    cost: 2,
+    attack: 1,
+    health: 3,
+    fortifyBuff: { attack: 1, health: 1 },
+    text: "Fortify: Gain +1/+1 at the start of your next Action Phase."
+  },
+
+  {
+    id: "wall_watcher",
+    name: "Wall Watcher",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Guard", "Fortify"],
+    cost: 3,
+    attack: 1,
+    health: 5,
+    fortifyBuff: { attack: 1, health: 0 },
+    text: "Guard. Fortify: Gain +1 Attack at the start of your next Action Phase."
+  }
+];
+
+const earthSpells = [
+  {
+    id: "burrow_into_earth",
+    name: "Burrow into Earth",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 2,
+    spellType: "buff_friendly_unit",
+    buff: { attack: 1, health: 3 },
+    text: "Give a friendly unit +1/+3."
+  },
+
+  {
+    id: "proper_stance",
+    name: "Proper Stance",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 1,
+    spellType: "buff_friendly_unit",
+    buff: { attack: 0, health: 2 },
+    text: "Give a friendly unit +0/+2."
+  }
+];
+
+const earthReactions = [];
+
+// --------------------------------------------------
+// Air
+// --------------------------------------------------
+
+const airUnits = [
+  {
+    id: "air_acolyte",
+    name: "Air Acolyte",
+    element: "Air",
+    type: "unit",
+    keywords: ["Dodge"],
+    cost: 2,
+    attack: 3,
+    health: 1,
+    text: "Dodge."
+  }
+];
+
+const airSpells = [
   {
     id: "sweeping_strikes",
     name: "Sweeping Strikes",
@@ -134,33 +254,10 @@ const cards = [
     spellType: "damage_two_enemy_units",
     damage: 2,
     text: "Choose two enemy units. Deal 2 damage to them."
-  },
+  }
+];
 
-  {
-    id: "face_burn",
-    name: "Face Burn",
-    element: "Fire",
-    school: "Firebending",
-    type: "spell",
-    cost: 3,
-    spellType: "damage_enemy_hero",
-    damage: 2,
-    igniteDamage: 4,
-    text: "Deal 2 damage to the enemy hero. Ignite: Deal 4 instead."
-  },
-
-  {
-    id: "burrow_into_earth",
-    name: "Burrow into Earth",
-    element: "Earth",
-    school: "Earthbending",
-    type: "spell",
-    cost: 2,
-    spellType: "buff_friendly_unit",
-    buff: { attack: 1, health: 3 },
-    text: "Give a friendly unit +1/+3."
-  },
-
+const airReactions = [
   {
     id: "banish",
     name: "Banish",
@@ -217,43 +314,108 @@ const cards = [
     reactionType: "weaken_summoned_unit",
     attackDebuff: 2,
     text: "Choose an enemy unit summoned this turn. It gets -2 Attack."
+  }
+];
+
+// --------------------------------------------------
+// Neutral
+// --------------------------------------------------
+
+const neutralUnits = [
+  {
+    id: "wandering_merchant",
+    name: "Wandering Merchant",
+    element: "Neutral",
+    type: "unit",
+    cost: 1,
+    attack: 2,
+    health: 1,
+    text: "A stubborn merchant with a very fragile cart."
   },
 
   {
-    id: "pebble_catcher",
-    name: "Pebble Catcher",
-    element: "Earth",
+    id: "harbor_brawler",
+    name: "Harbor Brawler",
+    element: "Neutral",
     type: "unit",
-    keywords: ["Fortify"],
     cost: 2,
-    attack: 1,
-    health: 3,
-    fortifyBuff: { attack: 1, health: 1 },
-    text: "Fortify: Gain +1/+1 at the start of your next Action Phase."
+    attack: 3,
+    health: 2,
+    text: "A rough fighter from the busy southern docks."
   },
 
   {
-    id: "wall_watcher",
-    name: "Wall Watcher",
-    element: "Earth",
+    id: "shrine_guardian",
+    name: "Shrine Guardian",
+    element: "Neutral",
     type: "unit",
-    keywords: ["Guard", "Fortify"],
+    keywords: ["Guard"],
     cost: 3,
     attack: 1,
     health: 5,
-    fortifyBuff: { attack: 1, health: 0 },
-    text: "Guard. Fortify: Gain +1 Attack at the start of your next Action Phase."
+    text: "Guard. A calm protector of old sacred paths."
+  }
+];
+
+const neutralSpells = [
+  {
+    id: "travelers_rations",
+    name: "Traveler's Rations",
+    element: "Neutral",
+    type: "spell",
+    cost: 1,
+    spellType: "heal_friendly_unit",
+    heal: 2,
+    text: "Restore 2 HP to a friendly unit."
   },
 
   {
-    id: "proper_stance",
-    name: "Proper Stance",
-    element: "Earth",
-    school: "Earthbending",
+    id: "bending_scroll",
+    name: "Bending Scroll",
+    element: "Neutral",
     type: "spell",
     cost: 1,
     spellType: "buff_friendly_unit",
-    buff: { attack: 0, health: 2 },
-    text: "Give a friendly unit +0/+2."
+    buff: { attack: 1, health: 1 },
+    text: "Give a friendly unit +1/+1."
   }
+];
+
+const neutralReactions = [
+  {
+    id: "lotus_seal",
+    name: "Lotus Seal",
+    element: "Neutral",
+    school: "Spirit",
+    type: "reaction",
+    cost: 3,
+    reactionType: "destroy_summoned_unit",
+    text: "Destroy an enemy unit summoned this turn."
+  }
+];
+
+// --------------------------------------------------
+// Full card pool
+// --------------------------------------------------
+
+const cards = [
+  ...fireUnits,
+  ...fireSpells,
+  ...fireReactions,
+
+  ...waterUnits,
+  ...waterSpells,
+  ...waterReactions,
+
+  ...earthUnits,
+  ...earthSpells,
+  ...earthReactions,
+
+  ...airUnits,
+  ...airSpells,
+  ...airReactions,
+
+  ...neutralUnits,
+  ...neutralSpells,
+  ...neutralReactions
 ];
