@@ -23,6 +23,17 @@ const fireUnits = [
     health: 1,
     igniteBuff: { attack: 1, health: 0 },
     text: "Swift. Ignite: Gain +1 Attack."
+  },
+
+  {
+    id: "fire_nation_recruit",
+    name: "Fire Nation Recruit",
+    element: "Fire",
+    type: "unit",
+    cost: 1,
+    attack: 1,
+    health: 1,
+    text: "A quick recruit ready to prove himself."
   }
 ];
 
@@ -63,6 +74,30 @@ const fireSpells = [
     damage: 1,
     igniteDamage: 2,
     text: "Deal 1 damage to the enemy hero. Ignite: Deal 2 instead."
+  },
+
+  {
+    id: "fire_whip",
+    name: "Fire Whip",
+    element: "Fire",
+    school: "Firebending",
+    type: "spell",
+    cost: 2,
+    spellType: "damage_enemy_unit",
+    damage: 3,
+    text: "Deal 3 damage to an enemy unit."
+  },
+
+  {
+    id: "war_drums",
+    name: "War Drums",
+    element: "Fire",
+    type: "spell",
+    cost: 2,
+    spellType: "draw_cards",
+    drawAmount: 1,
+    igniteDrawAmount: 1,
+    text: "Draw 1 card. Ignite: Draw 1 more."
   }
 ];
 
@@ -153,7 +188,7 @@ const earthUnits = [
     keywords: ["Guard"],
     cost: 2,
     attack: 1,
-    health: 4,
+    health: 3,
     text: "Guard."
   },
 
@@ -177,7 +212,7 @@ const earthUnits = [
     type: "unit",
     keywords: ["Guard", "Fortify"],
     cost: 3,
-    attack: 1,
+    attack: 0,
     health: 5,
     fortifyBuff: { attack: 1, health: 0 },
     text: "Guard. Fortify: Gain +1 Attack at the start of your next Action Phase."
@@ -193,8 +228,8 @@ const earthSpells = [
     type: "spell",
     cost: 2,
     spellType: "buff_friendly_unit",
-    buff: { attack: 1, health: 3 },
-    text: "Give a friendly unit +1/+3."
+    buff: { attack: 1, health: 2 },
+    text: "Give a friendly unit +1/+2."
   },
 
   {
@@ -205,8 +240,8 @@ const earthSpells = [
     type: "spell",
     cost: 1,
     spellType: "buff_friendly_unit",
-    buff: { attack: 0, health: 2 },
-    text: "Give a friendly unit +0/+2."
+    buff: { attack: 0, health: 1 },
+    text: "Give a friendly unit +0/+1."
   }
 ];
 
@@ -352,7 +387,7 @@ const neutralUnits = [
     keywords: ["Guard"],
     cost: 3,
     attack: 1,
-    health: 5,
+    health: 4,
     text: "Guard. A calm protector of old sacred paths."
   }
 ];
@@ -364,9 +399,9 @@ const neutralSpells = [
     element: "Neutral",
     type: "spell",
     cost: 1,
-    spellType: "heal_friendly_unit",
+    spellType: "gain_hero_health",
     heal: 2,
-    text: "Restore 2 HP to a friendly unit."
+    text: "Gain 2 HP."
   },
 
   {
@@ -374,7 +409,7 @@ const neutralSpells = [
     name: "Bending Scroll",
     element: "Neutral",
     type: "spell",
-    cost: 1,
+    cost: 2,
     spellType: "buff_friendly_unit",
     buff: { attack: 1, health: 1 },
     text: "Give a friendly unit +1/+1."

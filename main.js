@@ -1,4 +1,7 @@
-const TEST_MODE = true;
+const TEST_MODE = false;
+const USE_FIXED_DECKS = true;
+const SHUFFLE_DECKS = true;
+
 const MAX_BOARD_SIZE = 5;
 const MAX_HAND_SIZE = 10;
 
@@ -18,6 +21,7 @@ const gameState = {
       maxChi: 0,
       currentChi: 0,
       fatigueDamage: 0,
+      hasHadActionPhase: false,
       damagedEnemyHeroThisTurn: false,
       playedReactionThisReactionPhase: false,
       momentumActive: false,
@@ -32,6 +36,7 @@ const gameState = {
       maxChi: 0,
       currentChi: 0,
       fatigueDamage: 0,
+      hasHadActionPhase: false,
       damagedEnemyHeroThisTurn: false,
       playedReactionThisReactionPhase: false,
       momentumActive: false,
@@ -41,6 +46,102 @@ const gameState = {
     }
   ]
 };
+
+const fireTestDeckIds = [
+  "fire_nation_recruit",
+  "fire_nation_recruit",
+  "fire_nation_recruit",
+
+  "flame_adept",
+  "flame_adept",
+  "flame_adept",
+
+  "southern_raider",
+  "southern_raider",
+  "southern_raider",
+
+  "wandering_merchant",
+  "wandering_merchant",
+
+  "ember_strike",
+  "ember_strike",
+
+  "fire_whip",
+  "fire_whip",
+  "fire_whip",
+
+  "scorch_mark",
+
+  "face_burn",
+
+  "war_drums",
+  "war_drums"
+];
+
+const earthTestDeckIds = [
+  "stone_guardian",
+  "stone_guardian",
+
+  "pebble_catcher",
+  "pebble_catcher",
+  "pebble_catcher",
+
+  "wall_watcher",
+  "wall_watcher",
+
+  "shrine_guardian",
+
+  "wandering_merchant",
+  "wandering_merchant",
+
+  "harbor_brawler",
+  "harbor_brawler",
+
+  "proper_stance",
+  "proper_stance",
+  "proper_stance",
+
+  "burrow_into_earth",
+  "burrow_into_earth",
+
+  "bending_scroll",
+
+  "travelers_rations",
+  "travelers_rations"
+];
+
+function getCardById(cardId) {
+  const foundCard = cards.find(function (card) {
+    return card.id === cardId;
+  });
+
+  if (!foundCard) {
+    console.error(`Card not found: ${cardId}`);
+    return null;
+  }
+
+  return foundCard;
+}
+
+function buildDeck(cardIds) {
+  return cardIds
+    .map(function (cardId) {
+      return getCardById(cardId);
+    })
+    .filter(function (card) {
+      return card !== null;
+    });
+}
+
+function shuffleDeck(deck) {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+
+    const temporaryCard = deck[i];
+    deck[i] = deck[randomIndex];
+    deck[randomIndex] = temporaryCard;
+  }
+}
 
 function resetPlayer(player) {
   player.hp = 30;
@@ -53,6 +154,7 @@ function resetPlayer(player) {
   player.hand = [];
   player.board = [];
   player.fatigueDamage = 0;
+  player.hasHadActionPhase = false;
 }
 
 function resetGameState() {
@@ -76,8 +178,18 @@ function startGame() {
   const player1 = gameState.players[0];
   const player2 = gameState.players[1];
 
-  player1.deck = [...cards, ...cards, ...cards];
-  player2.deck = [...cards, ...cards, ...cards];
+  if (USE_FIXED_DECKS) {
+    player1.deck = buildDeck(fireTestDeckIds);
+    player2.deck = buildDeck(earthTestDeckIds);
+  } else {
+    player1.deck = [...cards, ...cards, ...cards];
+    player2.deck = [...cards, ...cards, ...cards];
+  }
+
+  if (SHUFFLE_DECKS) {
+    shuffleDeck(player1.deck);
+    shuffleDeck(player2.deck);
+  }
 
   const startingHandSize = TEST_MODE ? cards.length : 3;
 
@@ -100,9 +212,11 @@ function startGame() {
   } else {
     player1.maxChi = 1;
     player1.currentChi = 1;
+    player1.hasHadActionPhase = true;
 
     player2.maxChi = 0;
     player2.currentChi = 0;
+    player2.hasHadActionPhase = false;
   }
 
   showMessage("Player 1 starts the game. Action Phase.");
@@ -243,7 +357,9 @@ function isNoTargetSpell(card) {
     card.type === "spell" &&
     (
       card.spellType === "damage_enemy_units" ||
-      card.spellType === "damage_enemy_hero"
+      card.spellType === "damage_enemy_hero" ||
+      card.spellType === "draw_cards" ||
+      card.spellType === "gain_hero_health"
     )
   );
 }
@@ -754,6 +870,11 @@ function startReactionPhase() {
 
   const reactingPlayer = gameState.players[gameState.currentPlayerIndex];
 
+  if (!reactingPlayer.hasHadActionPhase && reactingPlayer.maxChi === 0) {
+    reactingPlayer.maxChi = 1;
+    reactingPlayer.currentChi = 1;
+  }
+
   showMessage(`${reactingPlayer.name}'s Reaction Phase. React or pass.`);
 
   renderGame();
@@ -780,8 +901,12 @@ function startActionPhase() {
   if (TEST_MODE) {
     currentPlayer.maxChi = 10;
     currentPlayer.currentChi = 10;
+    currentPlayer.hasHadActionPhase = true;
   } else {
-    if (currentPlayer.maxChi < 10) {
+    if (!currentPlayer.hasHadActionPhase) {
+      currentPlayer.maxChi = 1;
+      currentPlayer.hasHadActionPhase = true;
+    } else if (currentPlayer.maxChi < 10) {
       currentPlayer.maxChi += 1;
     }
 
@@ -1208,6 +1333,58 @@ function castNoTargetSpell() {
     showMessage(message);
 
     checkGameOver();
+    renderGame();
+    return;
+  }
+
+  if (spellCard.spellType === "draw_cards") {
+    currentPlayer.currentChi -= spellCard.cost;
+
+    const drawAmount = spellCard.drawAmount || 0;
+    const drawMessages = [];
+
+    currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+    gameState.selectedSpellCardIndex = null;
+
+    for (let i = 0; i < drawAmount; i++) {
+      const drawResult = drawCard(currentPlayer);
+
+      if (drawResult.drewCard) {
+        drawMessages.push(`drew ${drawResult.cardName}`);
+      }
+
+      if (drawResult.burnedCard) {
+        drawMessages.push(`hand was full, ${drawResult.cardName} was burned`);
+      }
+
+      if (drawResult.fatigueDamage > 0) {
+        drawMessages.push(`took ${drawResult.fatigueDamage} fatigue damage`);
+      }
+    }
+
+    let message = `${spellCard.name}: drew ${drawAmount} cards.`;
+
+    if (drawMessages.length > 0) {
+      message += ` ${drawMessages.join(", ")}.`;
+    }
+
+    showMessage(message);
+
+    checkGameOver();
+    renderGame();
+    return;
+  }
+
+  if (spellCard.spellType === "gain_hero_health") {
+    currentPlayer.currentChi -= spellCard.cost;
+
+    currentPlayer.hp += spellCard.heal;
+
+    currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+    gameState.selectedSpellCardIndex = null;
+
+    showMessage(`${spellCard.name}: ${currentPlayer.name} gained ${spellCard.heal} HP.`);
+
     renderGame();
     return;
   }

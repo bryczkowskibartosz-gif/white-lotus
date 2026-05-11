@@ -183,3 +183,72 @@ Do not create complicated stack/interrupt logic yet.
 - Add better card layout and visual clarity.
 - Add basic menu: Start Game / Restart / Rules.
 - Add more original card names and lore text.
+
+Fire vs Earth playtest
+
+Game 1
+Winner: P2
+Winner HP: 16
+Loser HP: -1
+Game ended at max Chi: 10
+What felt too strong: Guard minions vs Fire (can't activate Ignite)
+What felt useless: Ignite cards especially the ones who only damage enemy hero cause they don't contest the board
+Notes: P1 (Fire) had a good start with minions and damage to P2 hero, P2 stabilized with high HP minions and Guard with buffs. Interesting choices with Ignite cards (if you have two of them, you have to decide which one you use to damage enemy hero and lose Ignite bonus to gain Ignite bonus from the other card), ex you have to use Scorch Mark to damage enemy hero so your Fire Initiate gets buff, but you lose out on damage from Scorch Mark because Ignite didn't trigger
+
+Game 2
+Winner: P2 
+Winner HP: 20
+Loser HP: 0
+Game ended at max Chi: 9
+What felt too strong: T2 Stone Guardian + Proper Stance, T3 you can keep buffing the Stone Guardian cause it's not realistic for P1 to have enough minions to deal 6 damage to buffed Stone Guardian
+What felt useless:
+Notes: P2 (Earth) often cannot play anything turn 1-2 cause lack of minions and only buffs in hand, no proactive spells. P1 runs out of cards quickly. P2 often has considerably more cards in hand. P1 has many 1 health minions, so Stone Guardian and Wall Watcher even without buffs seem too good at trading. When you have one or two Guard minions and buffs on them, you can just ignore P1 board and keep going face with your high Health minion and keep summoning minions that are also defended by Guard
+
+Game 3
+Winner: P2
+Winner HP: 20
+Loser HP: -1
+Game ended at max Chi: 8
+What felt too strong: If P2 has one minion that survives (especially if it has Guard) it can be buffed very easily for cheap with Proper Stance and other buffs, to the point where it's impossible to remove (at least considering the current options for removal/no hard removal)
+What felt useless: P1 often gets stuck with Face Burn and Scorch Mark in hand, with no way to activate Ignite, with no buffs to minions, spells that help with board control, and if P2 has Guard it's basically game over on T4 or T5 
+Notes: P1 minions have too little health, not enough proactive cards, probably not enough card draw, when P2 establishes one minion with Guard and buffs, he can keep summoning minions and attacking P1 hero with disregard to P1 board, and then game can easily end at T8/T9/T10, with P1 having 2-3 minions on board that can't even kill one buffed minions from P2, and P2 can just ignore the P1 minions and keep attacking P1 hero
+
+Game 4
+Winner: P2 would eventually win, since P1 has no comeback mechanics and was practically locked out of the game by T8-T10
+Winner HP: -
+Ended at max Chi: -
+Did Fire kill any Guard?: yes, with Fire Whip (felt like effective removal)
+Did Ignite activate often?: yes
+Did Earth still lock Fire?: yes, after T5 Fire was out ouf cards, and Earth could play 2 minions per turn, and Guard still walled out Fire
+Notes: Fortify was harder to activate (ex. Fire Whip killed Pebble Catcher T3). Pebble Catcher is just strictly better Stone Guardian. Shrine Guardian feels like a better Wall Watcher (with Wall Watcher vanilla stats at 0/5) and the neutral Gaurd minion are the same. But Wall Watcher seems more balanced and more grounded when it cannot counterattack the turn he's summoned. Maybe his Fortify bonus could be buffed? Class cards should be on average stronger than Neutral. Board gameplay feel more back-and-forth (Earth couldn't just ignore P1 board and keep going face as before). P1 could trade with P2 players better due to low attack value of P2, at least until T8 where due to low amount of cards P1 was locked out by three P2 Guard minions. By T10 there was no point in playing, as both players could only play one card per turn due to lack of draw, and the gameplay felt slow and it'd take multiple turns for the game to end, with P2 just whacking P1 with low health minions while P2 struggles to play anything that could stick and do anything.
+Most suspicious card: Hard to tell. P1 builds tempo in T1-T3 but after T4 there's not enough gas in P1. P2 is on the defensive for the first few turns, but after that he has more cards in hand than P1 and can play mutiple minions per turn, while P1 struggles to play 1-2 cards per turn. 
+
+Game 5:
+Notes: Why is Bending Scroll (neutral spell) so much stronger than Proper Stance? P2 has a harder time sticking minions, by T5 all minions were removed by P1 the turn they were played, that is good. By T6 P2 can stick a minion or immediately play a minion with buff, and by T6 P1 has not enough cards to deal with it. Basically locking him out again. By T7 has two Guard minions, one with stats 3/7, another with 1/3, P1 has all minions removed. The game is basically over, P1 is in topdeck mode.
+Czy Fire nadal kończy bez ręki przed T6? - by T7 but card draw card was not drawn 
+Czy War Drums pomaga, ale nie robi Fire broken? - War Drums was not drawn this game 
+Czy Earth nadal stabilizuje, ale nie zamyka gry jednym Guardem? - P2 stabilizes later than in previous patches 
+Czy Shrine Guardian jako 0/5 dalej jest użyteczny? - Shrine Guardian got patched to 1/4 
+Czy Wall Watcher czuje się jak class card, a nie gorszy neutral? - Wall Watcher feels balanced and fine 
+
+Game 6:
+Notes: P1 often has dead turn 1. As aggro deck, he should have viable T1 options to start the game as strong as possible. T2 there's often also not many good plays if you don't want to waste Fire Initiate ignite bonus. Probably needs T1 minions, so they can attack T2 and activate Ignite bonuses on T2. P2 also often has dead T1-T2 because of lack of cheap minions and buffs that clog hand, but that is more acceptable as a control/defensive class. Game feels more playable to P1 if P2 can't establish Guard minion early. You can keep activating Ignite to snowball.   
+Czy Fire nadal kończy bez ręki przed T6? - Yes, by turn T6-T7 has topdeck mode 
+Czy War Drums pomaga, ale nie robi Fire broken? - War Drums was not drawn 
+Czy Earth nadal stabilizuje, ale nie zamyka gry jednym Guardem? - P1 was snowballing with minions and Ignite and damage to P2 hero by T5, at that point P2 HP was 17. T5 Earth played Wall Watcher and Burrow into Earth, Wall Watcher was 1/7 and it was enough to lock game out, as P1 had only one card in hand at that point, but three minions on board - all of them were 2 attack each, so couldn't kill Wall Watcher. Since Wall Watcher got buffed, it could counterattack. T6 Earth buffed Wall Watcher even more with two buffs, making it 3/9, thus locking out P1. 
+Czy Shrine Guardian jako 0/5 dalej jest użyteczny? - Shrine Guardian got patched to 1/4 
+Czy Wall Watcher czuje się jak class card, a nie gorszy neutral? - Wall Watcher feels balanced and fine 
+
+Game 7:
+Notes: P1 didn't have any minions to play T1 and T2, but played War Drums T2. P1 played War Drums T4. Could clear all P1 minions up until T4. T4 P2 played Pebble Catcher with two buffs, making it 2/5. P1 managed to remove it with Fire Whip and Ember Strike. T5 P2 had no minions to play, only buffs, so he had to skip T5 with no cards played. By T6, P1 had snowballed and had 4 minions on board (vs 0 of P2) and had dealt 15 damage to P2 hero. T6 P2 played Wall Watcher with Bending Scroll and Proper Stance, making it 1/7. P1 could clear it with Ember Strike and two minions, but they both died since they were 1HP. Feels balanced. T7 P2 had two cards -> Traveler's Rations that could not be played and Wandering Merchant. Only able to spend 1 out of 7 Chi. Traveler's Rations might need to be buffed to also be able to target your hero. Both P1 and P2 might need actual reaction cards, cause Reaction Phase is basically useless right now. Maybe Fire could use some reaction card that says reduce enemy unit HP to 1, so it can be better against high health Buffed minions when P2 overcommits buffs on one unit. P2 could have reaction cards that restore his hero health, or even better -> give extra maximum health so can be played even when at full health to gain extra health. T8 was also dead for P2 with two buffs in hand and no minions. P1 won on T9, P2 HP was 0, P1 HP was 30. 
+Czy Fire nadal kończy bez ręki przed T6? - No, because War Drums was played two times, Fire could keep snowballing and maintain tempo. Game felt good as it felt more dynamic.
+Czy War Drums pomaga, ale nie robi Fire broken? - War Drums was drawn and played two times early in the game. Might be a tad strong, maybe nerfing to Draw 1 Cards, Ignite: Draw another so it cannot be a very strong proactive play with no way to damage enemy hero
+Czy Earth nadal stabilizuje, ale nie zamyka gry jednym Guardem? - P2 was unable to stabilize, might be because of bad draw (drew a lot of buffs with no minions)
+Czy Wall Watcher czuje się jak class card, a nie gorszy neutral? - Wall Watcher feels balanced and fine 
+
+Current balance testing:
+- Added fixed Fire vs Earth test decks.
+- Fire vs Earth matchup is being tested as aggro vs control.
+- Fire needs early pressure and card draw to avoid topdeck mode.
+- Earth stabilizes with Guard, Fortify and buffs.
+- War Drums, Fire Nation Recruit, Traveler's Rations and Bending Scroll changes need more testing.
