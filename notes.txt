@@ -74,6 +74,9 @@ Implemented mechanics:
 - Drawing with full hand burns the drawn card.
 - Basic win screen.
 - Fatigue damage.
+- Air reaction cards: Gust Snare, Crosswind Jab, Be the Leaf.
+- Fortify: one-time Earth bonus that activates at the start of your Action Phase if the unit survived since being played.
+- Earth cards added: Pebble Catcher, Wall Watcher, Proper Stance.
 
 Reaction card balance notes:
 Reaction cards should usually cost 0–2 Chi.
@@ -133,10 +136,11 @@ For now, only do a mini balance sanity check:
 
 Current balance watchlist:
 - Lotus Seal costs 3 Chi, which may be expensive for a reaction card.
-- Momentum works, but Air needs more reaction cards to support it.
-- Earth has too few cards to test its identity properly.
 - Fire has some Ignite support, but needs more aggressive options.
 - Water currently has the clearest identity because Flow already has multiple cards.
+- Crosswind Jab currently deals 3 damage for 1 Chi, but has a narrow summoned-unit condition.
+- Pebble Catcher Fortify +1/+1 may still be strong, but it is one-time only.
+- Wall Watcher gives Earth a stronger defensive identity.
 
 Next steps:
 

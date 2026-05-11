@@ -159,5 +159,101 @@ const cards = [
     spellType: "buff_friendly_unit",
     buff: { attack: 1, health: 3 },
     text: "Give a friendly unit +1/+3."
+  },
+
+  {
+    id: "banish",
+    name: "Banish",
+    element: "Air",
+    school: "Airbending",
+    type: "reaction",
+    cost: 1,
+    reactionType: "destroy_friendly_unit_draw_cards",
+    drawAmount: 2,
+    text: "Destroy a friendly unit. Draw 2 cards."
+  },
+
+  {
+    id: "be_the_leaf",
+    name: "Be the Leaf",
+    element: "Air",
+    school: "Airbending",
+    type: "reaction",
+    cost: 1,
+    reactionType: "give_dodge_to_friendly_unit",
+    text: "Give a friendly unit Dodge."
+  },
+
+  {
+    id: "gust_snare",
+    name: "Gust Snare",
+    element: "Air",
+    school: "Airbending",
+    type: "reaction",
+    cost: 1,
+    reactionType: "freeze_summoned_unit",
+    text: "Choose an enemy unit summoned this turn. It can't attack next turn."
+  },
+
+  {
+    id: "crosswind_jab",
+    name: "Crosswind Jab",
+    element: "Air",
+    school: "Airbending",
+    type: "reaction",
+    cost: 1,
+    reactionType: "damage_summoned_unit",
+    damage: 3,
+    text: "Deal 3 damage to an enemy unit summoned this turn."
+  },
+
+  {
+    id: "sudden_gale",
+    name: "Sudden Gale",
+    element: "Air",
+    school: "Airbending",
+    type: "reaction",
+    cost: 1,
+    reactionType: "weaken_summoned_unit",
+    attackDebuff: 2,
+    text: "Choose an enemy unit summoned this turn. It gets -2 Attack."
+  },
+
+  {
+    id: "pebble_catcher",
+    name: "Pebble Catcher",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Fortify"],
+    cost: 2,
+    attack: 1,
+    health: 3,
+    fortifyBuff: { attack: 1, health: 1 },
+    text: "Fortify: Gain +1/+1 at the start of your next Action Phase."
+  },
+
+  {
+    id: "wall_watcher",
+    name: "Wall Watcher",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Guard", "Fortify"],
+    cost: 3,
+    attack: 1,
+    health: 5,
+    fortifyBuff: { attack: 1, health: 0 },
+    text: "Guard. Fortify: Gain +1 Attack at the start of your next Action Phase."
+  },
+
+  {
+    id: "proper_stance",
+    name: "Proper Stance",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 1,
+    spellType: "buff_friendly_unit",
+    buff: { attack: 0, health: 2 },
+    text: "Give a friendly unit +0/+2."
   }
 ];

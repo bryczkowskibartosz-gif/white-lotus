@@ -270,6 +270,14 @@ function selectedSpellTargetsFriendlyUnits(card) {
   );
 }
 
+function selectedReactionTargetsFriendlyUnits(card) {
+  return (
+    card &&
+    card.type === "reaction" &&
+    card.reactionType === "give_dodge_to_friendly_unit"
+  );
+}
+
 function addElementClassToCard(cardElement, card) {
   if (card.element) {
     cardElement.classList.add(`${card.element.toLowerCase()}-element`);
@@ -383,7 +391,8 @@ function playCard(cardIndex) {
     summonedThisTurn: true,
     dodgeUsed: false,
     skipNextAttack: false,
-    frozenThisTurn: false
+    frozenThisTurn: false,
+    fortifyUsed: false
   };
 
   currentPlayer.board.push(unit);
@@ -467,6 +476,12 @@ function selectReactionCard(cardIndex) {
   gameState.selectedSpellCardIndex = null;
   gameState.selectedReactionCardIndex = cardIndex;
 
+  if (selectedReactionTargetsFriendlyUnits(card)) {
+    showMessage(`${card.name} selected. Click one of your units.`);
+    renderGame();
+    return;
+  }
+
   showMessage(`${card.name} selected. Click an enemy unit summoned this turn.`);
 
   renderGame();
@@ -529,7 +544,143 @@ function playReactionOnEnemyUnit(enemyUnitIndex) {
     return;
   }
 
+  if (reactionCard.reactionType === "freeze_summoned_unit") {
+    reactingPlayer.currentChi -= reactionCard.cost;
+
+    targetUnit.skipNextAttack = true;
+
+    reactingPlayer.hand.splice(gameState.selectedReactionCardIndex, 1);
+
+    reactingPlayer.playedReactionThisReactionPhase = true;
+
+    showMessage(`${reactionCard.name} stopped ${targetUnit.name}. It can't attack next turn.`);
+
+    gameState.selectedReactionCardIndex = null;
+
+    renderGame();
+    return;
+  }
+
+  if (reactionCard.reactionType === "damage_summoned_unit") {
+    reactingPlayer.currentChi -= reactionCard.cost;
+
+    const damageResult = dealDamageToUnit(targetUnit, reactionCard.damage);
+
+    let message = "";
+
+    if (damageResult.wasDodged) {
+      message = `${targetUnit.name} dodged ${reactionCard.name}.`;
+    } else {
+      message = `${reactionCard.name} dealt ${damageResult.actualDamage} damage to ${targetUnit.name}.`;
+    }
+
+    if (targetUnit.currentHealth <= 0) {
+      enemyPlayer.board.splice(enemyUnitIndex, 1);
+      message += ` ${targetUnit.name} was destroyed.`;
+    }
+
+    reactingPlayer.hand.splice(gameState.selectedReactionCardIndex, 1);
+
+    reactingPlayer.playedReactionThisReactionPhase = true;
+
+    showMessage(message);
+
+    gameState.selectedReactionCardIndex = null;
+
+    renderGame();
+    return;
+  }
+
+  if (reactionCard.reactionType === "weaken_summoned_unit") {
+    reactingPlayer.currentChi -= reactionCard.cost;
+
+    targetUnit.attack -= reactionCard.attackDebuff;
+
+    if (targetUnit.attack < 0) {
+      targetUnit.attack = 0;
+    }
+
+    reactingPlayer.hand.splice(gameState.selectedReactionCardIndex, 1);
+
+    reactingPlayer.playedReactionThisReactionPhase = true;
+
+    showMessage(`${reactionCard.name} weakened ${targetUnit.name}. It lost ${reactionCard.attackDebuff} Attack.`);
+
+    gameState.selectedReactionCardIndex = null;
+
+    renderGame();
+    return;
+  }
+
   showMessage("This reaction effect is not implemented yet.");
+}
+
+function playReactionOnFriendlyUnit(friendlyUnitIndex) {
+  if (gameState.gameOver) {
+    return;
+  }
+
+  if (gameState.phase !== "reaction") {
+    return;
+  }
+
+  if (gameState.selectedReactionCardIndex === null) {
+    showMessage("Select a reaction card first.");
+    return;
+  }
+
+  const reactingPlayer = gameState.players[gameState.currentPlayerIndex];
+
+  const reactionCard = reactingPlayer.hand[gameState.selectedReactionCardIndex];
+  const targetUnit = reactingPlayer.board[friendlyUnitIndex];
+
+  if (!reactionCard || reactionCard.type !== "reaction") {
+    showMessage("Selected card is not a reaction.");
+    gameState.selectedReactionCardIndex = null;
+    return;
+  }
+
+  if (!selectedReactionTargetsFriendlyUnits(reactionCard)) {
+    showMessage("This reaction cannot target a friendly unit.");
+    return;
+  }
+
+  if (!targetUnit) {
+    showMessage("No friendly unit found.");
+    return;
+  }
+
+  if (reactingPlayer.currentChi < reactionCard.cost) {
+    showMessage("Not enough Chi for this reaction.");
+    return;
+  }
+
+  if (reactionCard.reactionType === "give_dodge_to_friendly_unit") {
+    reactingPlayer.currentChi -= reactionCard.cost;
+
+    if (!targetUnit.keywords) {
+      targetUnit.keywords = [];
+    }
+
+    if (!hasKeyword(targetUnit, "Dodge")) {
+      targetUnit.keywords.push("Dodge");
+    }
+
+    targetUnit.dodgeUsed = false;
+
+    reactingPlayer.hand.splice(gameState.selectedReactionCardIndex, 1);
+
+    reactingPlayer.playedReactionThisReactionPhase = true;
+
+    showMessage(`${reactionCard.name} gave Dodge to ${targetUnit.name}.`);
+
+    gameState.selectedReactionCardIndex = null;
+
+    renderGame();
+    return;
+  }
+
+  showMessage("This friendly reaction effect is not implemented yet.");
 }
 
 function endTurn() {
@@ -590,6 +741,7 @@ function startActionPhase() {
   }
 
   const drawResult = drawCard(currentPlayer);
+  const fortifyMessages = applyFortifyBonuses(currentPlayer);
   prepareUnitsForTurn(currentPlayer);
 
   let actionPhaseMessage = `${currentPlayer.name}'s Action Phase started.`;
@@ -614,6 +766,10 @@ function startActionPhase() {
     actionPhaseMessage += " Momentum is active!";
   }
 
+  if (fortifyMessages.length > 0) {
+    actionPhaseMessage += ` Fortify: ${fortifyMessages.join(", ")}.`;
+  }
+
   checkGameOver();
 
   if (gameState.gameOver) {
@@ -624,6 +780,41 @@ function startActionPhase() {
   showMessage(actionPhaseMessage);
 
   renderGame();
+}
+
+function applyFortifyBonuses(player) {
+  const fortifyMessages = [];
+
+  player.board.forEach(function (unit) {
+    if (!hasKeyword(unit, "Fortify")) {
+      return;
+    }
+
+    if (!unit.fortifyBuff) {
+      return;
+    }
+
+    if (unit.summonedThisTurn) {
+      return;
+    }
+
+    if (unit.fortifyUsed) {
+      return;
+    }
+
+    const attackBuff = unit.fortifyBuff.attack || 0;
+    const healthBuff = unit.fortifyBuff.health || 0;
+
+    unit.attack += attackBuff;
+    unit.maxHealth += healthBuff;
+    unit.currentHealth += healthBuff;
+
+    unit.fortifyUsed = true;
+
+    fortifyMessages.push(`${unit.name} gained +${attackBuff}/+${healthBuff}`);
+  });
+
+  return fortifyMessages;
 }
 
 function clearSummonedThisTurn(player) {
@@ -1401,6 +1592,20 @@ function renderBoard(player, boardId) {
 
       cardElement.addEventListener("click", function () {
         const selectedSpell = getSelectedSpell();
+        const selectedReaction =
+          gameState.selectedReactionCardIndex !== null
+            ? gameState.players[gameState.currentPlayerIndex].hand[gameState.selectedReactionCardIndex]
+            : null;
+
+        if (selectedReaction) {
+          if (selectedReactionTargetsFriendlyUnits(selectedReaction)) {
+            playReactionOnFriendlyUnit(index);
+            return;
+          }
+
+          showMessage("This reaction cannot target a friendly unit.");
+          return;
+        }
 
         if (selectedSpell) {
           if (selectedSpellTargetsFriendlyUnits(selectedSpell)) {
@@ -1420,6 +1625,15 @@ function renderBoard(player, boardId) {
       }
 
       if (selectedSpellTargetsFriendlyUnits(selectedSpell)) {
+        cardElement.classList.add("valid-target");
+      }
+
+      const selectedReaction =
+        gameState.selectedReactionCardIndex !== null
+          ? gameState.players[gameState.currentPlayerIndex].hand[gameState.selectedReactionCardIndex]
+          : null;
+
+      if (selectedReactionTargetsFriendlyUnits(selectedReaction)) {
         cardElement.classList.add("valid-target");
       }
     }
@@ -1551,6 +1765,16 @@ function renderBoard(player, boardId) {
       dodgeText = `<p>Dodge: ${unit.dodgeUsed ? "Used" : "Ready"}</p>`;
     }
 
+    let fortifyText = "";
+
+    if (hasKeyword(unit, "Fortify") && unit.fortifyBuff) {
+      const fortifyStatus = unit.fortifyUsed ? "Used" : "Ready";
+      const attackBuff = unit.fortifyBuff.attack || 0;
+      const healthBuff = unit.fortifyBuff.health || 0;
+
+      fortifyText = `<p>Fortify: +${attackBuff}/+${healthBuff} (${fortifyStatus})</p>`;
+    }
+
     let frozenText = "";
 
     if (unit.skipNextAttack) {
@@ -1565,10 +1789,11 @@ function renderBoard(player, boardId) {
       <h4>${unit.name}</h4>
       <p>Attack: ${unit.attack}</p>
       <p>HP: ${unit.currentHealth}/${unit.maxHealth}</p>
-      ${guardText}
-      ${keywordText}
-      ${dodgeText}
-      ${frozenText}
+${guardText}
+${keywordText}
+${fortifyText}
+${dodgeText}
+${frozenText}
       <p>Status: ${attackStatus}</p>
       <p>${summonStatus}</p>
     `;
