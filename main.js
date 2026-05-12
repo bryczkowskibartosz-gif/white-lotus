@@ -48,66 +48,104 @@ const gameState = {
 };
 
 const fireTestDeckIds = [
-  "fire_nation_recruit",
+  // Fire units — early pressure / Ignite setup
   "fire_nation_recruit",
   "fire_nation_recruit",
 
   "flame_adept",
   "flame_adept",
-  "flame_adept",
 
   "southern_raider",
   "southern_raider",
-  "southern_raider",
 
-  "wandering_merchant",
-  "wandering_merchant",
-
+  // Fire spells — removal + face pressure + draw
   "ember_strike",
   "ember_strike",
 
-  "fire_whip",
   "fire_whip",
   "fire_whip",
 
   "scorch_mark",
+  "scorch_mark",
 
+  "face_burn",
   "face_burn",
 
   "war_drums",
-  "war_drums"
+  "war_drums",
+
+  // Neutral cards — aggressive / high attack / tempo
+  "wandering_merchant",
+  "wandering_merchant",
+
+  "harbor_brawler",
+  "harbor_brawler",
+
+  "young_rascal",
+  "young_rascal",
+
+  "platypus_bear",
+  "platypus_bear",
+
+  "roadside_colossus",
+  "roadside_colossus",
+
+  "overbearing_teacher",
+  "overbearing_teacher",
+
+  "old_map",
+  "old_map"
 ];
 
 const earthTestDeckIds = [
+  // Earth units — Guard / Fortify / defensive board
+  "academy_student",
+  "academy_student",
+
   "stone_guardian",
   "stone_guardian",
 
   "pebble_catcher",
   "pebble_catcher",
-  "pebble_catcher",
 
   "wall_watcher",
   "wall_watcher",
+
+  // Earth buffs — class identity
+  "proper_stance",
+  "proper_stance",
+
+  "burrow_into_earth",
+  "burrow_into_earth",
+
+  // Earth proactive spells — control / stabilization
+  "shifting_sands",
+  "shifting_sands",
+
+  "overwhelming_weight",
+  "overwhelming_weight",
+
+  "splitting_rock",
+  "splitting_rock",
+
+  "enduring_spirit",
+  "enduring_spirit",
+
+  // Neutral cards — HP / Guard / late game / value
+  "tea_house_patron",
+  "tea_house_patron",
 
   "shrine_guardian",
+  "shrine_guardian",
 
-  "wandering_merchant",
-  "wandering_merchant",
+  "roadside_colossus",
+  "roadside_colossus",
 
-  "harbor_brawler",
-  "harbor_brawler",
+  "city_guard",
+  "city_guard",
 
-  "proper_stance",
-  "proper_stance",
-  "proper_stance",
-
-  "burrow_into_earth",
-  "burrow_into_earth",
-
-  "bending_scroll",
-
-  "travelers_rations",
-  "travelers_rations"
+  "old_map",
+  "old_map"
 ];
 
 function getCardById(cardId) {
@@ -1340,7 +1378,13 @@ function castNoTargetSpell() {
   if (spellCard.spellType === "draw_cards") {
     currentPlayer.currentChi -= spellCard.cost;
 
-    const drawAmount = spellCard.drawAmount || 0;
+    let drawAmount = spellCard.drawAmount || 0;
+    const igniteWasActive = isIgniteActive(currentPlayer);
+
+    if (igniteWasActive && spellCard.igniteDrawAmount) {
+      drawAmount += spellCard.igniteDrawAmount;
+    }
+
     const drawMessages = [];
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
@@ -1362,10 +1406,10 @@ function castNoTargetSpell() {
       }
     }
 
-    let message = `${spellCard.name}: drew ${drawAmount} cards.`;
+    let message = `${spellCard.name}: drew ${drawAmount} card(s).`;
 
-    if (drawMessages.length > 0) {
-      message += ` ${drawMessages.join(", ")}.`;
+    if (igniteWasActive && spellCard.igniteDrawAmount) {
+      message += " Ignite activated.";
     }
 
     showMessage(message);

@@ -6,8 +6,8 @@ const fireUnits = [
     type: "unit",
     keywords: ["Ignite"],
     cost: 1,
-    attack: 1,
-    health: 2,
+    attack: 2,
+    health: 1,
     igniteBuff: { attack: 1, health: 1 },
     text: "Ignite: Gain +1/+1."
   },
@@ -20,7 +20,7 @@ const fireUnits = [
     keywords: ["Swift", "Ignite"],
     cost: 2,
     attack: 2,
-    health: 1,
+    health: 2,
     igniteBuff: { attack: 1, health: 0 },
     text: "Swift. Ignite: Gain +1 Attack."
   },
@@ -30,6 +30,7 @@ const fireUnits = [
     name: "Fire Nation Recruit",
     element: "Fire",
     type: "unit",
+    keywords: ["Swift"],
     cost: 1,
     attack: 1,
     health: 1,
@@ -56,7 +57,7 @@ const fireSpells = [
     element: "Fire",
     school: "Firebending",
     type: "spell",
-    cost: 3,
+    cost: 2,
     spellType: "damage_enemy_hero",
     damage: 2,
     igniteDamage: 4,
@@ -72,8 +73,8 @@ const fireSpells = [
     cost: 1,
     spellType: "damage_enemy_hero",
     damage: 1,
-    igniteDamage: 2,
-    text: "Deal 1 damage to the enemy hero. Ignite: Deal 2 instead."
+    igniteDamage: 3,
+    text: "Deal 1 damage to the enemy hero. Ignite: Deal 3 instead."
   },
 
   {
@@ -84,8 +85,8 @@ const fireSpells = [
     type: "spell",
     cost: 2,
     spellType: "damage_enemy_unit",
-    damage: 3,
-    text: "Deal 3 damage to an enemy unit."
+    damage: 4,
+    text: "Deal 4 damage to an enemy unit."
   },
 
   {
@@ -216,7 +217,20 @@ const earthUnits = [
     health: 5,
     fortifyBuff: { attack: 1, health: 0 },
     text: "Guard. Fortify: Gain +1 Attack at the start of your next Action Phase."
-  }
+  },
+
+  {
+    id: "academy_student",
+    name: "Academy Student",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Fortify"],
+    cost: 1,
+    attack: 1,
+    health: 2,
+    fortifyBuff: { attack: 1, health: 1 },
+    text: "Fortify: Gain +1/+1 at the start of your next Action Phase."
+  },
 ];
 
 const earthSpells = [
@@ -242,7 +256,56 @@ const earthSpells = [
     spellType: "buff_friendly_unit",
     buff: { attack: 0, health: 1 },
     text: "Give a friendly unit +0/+1."
+  },
+
+  {
+    id: "shifting_sands",
+    name: "Shifting Sands",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 2,
+    spellType: "damage_enemy_units",
+    damage: 1,
+    text: "Deal 1 damage to all enemy units."
+  },
+
+  {
+    id: "overwhelming_weight",
+    name: "Overwhelming Weight",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 3,
+    spellType: "damage_enemy_unit",
+    damage: 5,
+    text: "Deal 5 damage to an enemy unit."
+  },
+
+  {
+    id: "splitting_rock",
+    name: "Splitting Rock",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 5,
+    spellType: "damage_two_enemy_units",
+    damage: 3,
+    text: "Choose two enemy units. Deal 3 damage to them."
+  },
+
+  {
+    id: "enduring_spirit",
+    name: "Enduring Spirit",
+    element: "Earth",
+    school: "Spirit",
+    type: "spell",
+    cost: 2,
+    spellType: "gain_hero_health",
+    heal: 5,
+    text: "Gain 5 HP."
   }
+
 ];
 
 const earthReactions = [];
@@ -369,6 +432,17 @@ const neutralUnits = [
   },
 
   {
+    id: "turtle_duck",
+    name: "Turtle Duck",
+    element: "Neutral",
+    type: "unit",
+    cost: 1,
+    attack: 1,
+    health: 2,
+    text: "Not immune to pebbles."
+  },
+
+  {
     id: "harbor_brawler",
     name: "Harbor Brawler",
     element: "Neutral",
@@ -377,6 +451,17 @@ const neutralUnits = [
     attack: 3,
     health: 2,
     text: "A rough fighter from the busy southern docks."
+  },
+
+  {
+    id: "tea_house_patron",
+    name: "Tea House Patron",
+    element: "Neutral",
+    type: "unit",
+    cost: 2,
+    attack: 2,
+    health: 3,
+    text: "A calm and collected individual who enjoys a good cup of tea."
   },
 
   {
@@ -389,7 +474,64 @@ const neutralUnits = [
     attack: 1,
     health: 4,
     text: "Guard. A calm protector of old sacred paths."
-  }
+  },
+
+  {
+    id: "young_rascal",
+    name: "Young Rascal",
+    element: "Neutral",
+    type: "unit",
+    keywords: ["Swift"],
+    cost: 3,
+    attack: 3,
+    health: 1,
+    text: "Swift. A mischievous troublemaker who can't sit still."
+  },
+
+  {
+    id: "platypus_bear",
+    name: "Platypus Bear",
+    element: "Neutral",
+    type: "unit",
+    cost: 4,
+    attack: 5,
+    health: 4,
+    text: "Not JUST a bear."
+  },
+
+  {
+    id: "roadside_colossus",
+    name: "Roadside Colossus",
+    element: "Neutral",
+    type: "unit",
+    cost: 5,
+    attack: 4,
+    health: 6,
+    text: "A huge traveler who takes up the whole road."
+  },
+
+  {
+    id: "city_guard",
+    name: "City Guard",
+    element: "Neutral",
+    type: "unit",
+    cost: 6,
+    attack: 3,
+    health: 6,
+    keywords: ["Guard"],
+    text: "Will do everything to guard the protect."
+  },
+
+  {
+    id: "overbearing_teacher",
+    name: "Overbearing Teacher",
+    element: "Neutral",
+    type: "unit",
+    cost: 6,
+    attack: 6,
+    health: 4,
+    text: "Class is in session."
+  },
 ];
 
 const neutralSpells = [
@@ -413,6 +555,17 @@ const neutralSpells = [
     spellType: "buff_friendly_unit",
     buff: { attack: 1, health: 1 },
     text: "Give a friendly unit +1/+1."
+  },
+
+  {
+    id: "old_map",
+    name: "Old Map",
+    element: "Neutral",
+    type: "spell",
+    cost: 3,
+    spellType: "draw_cards",
+    drawAmount: 2,
+    text: "Draw 2 cards."
   }
 ];
 
