@@ -49,8 +49,8 @@ const gameState = {
 
 const fireTestDeckIds = [
   // Fire units — early pressure / Ignite setup
-  "fire_nation_recruit",
-  "fire_nation_recruit",
+  "spark_thrower",
+  "confident_duelist",
 
   "flame_adept",
   "flame_adept",
@@ -99,7 +99,7 @@ const fireTestDeckIds = [
 
 const earthTestDeckIds = [
   // Earth units — Guard / Fortify / defensive board
-  "academy_student",
+  "lowly_armorsmith",
   "academy_student",
 
   "stone_guardian",
@@ -293,6 +293,166 @@ function drawCard(player) {
     burnedCard: false,
     cardName: card.name,
     fatigueDamage: 0
+  };
+}
+
+function drawCardType(player, cardType) {
+  const cardIndex = player.deck.findIndex(function (card) {
+    return card.type === cardType;
+  });
+
+  if (cardIndex === -1) {
+    return {
+      drewCard: false,
+      burnedCard: false,
+      noMatchingCard: true,
+      cardName: null
+    };
+  }
+
+  const card = player.deck.splice(cardIndex, 1)[0];
+
+  if (player.hand.length >= MAX_HAND_SIZE) {
+    return {
+      drewCard: false,
+      burnedCard: true,
+      noMatchingCard: false,
+      cardName: card.name
+    };
+  }
+
+  player.hand.push(card);
+
+  return {
+    drewCard: true,
+    burnedCard: false,
+    noMatchingCard: false,
+    cardName: card.name
+  };
+}
+
+function resolveBattlecry(player, enemyPlayer, unit) {
+  const battlecryMessages = [];
+
+  if (!unit.battlecry) {
+    return battlecryMessages;
+  }
+
+  if (unit.battlecry.type === "draw_card_type") {
+    const amount = unit.battlecry.amount || 1;
+    const cardType = unit.battlecry.cardType;
+
+    for (let i = 0; i < amount; i++) {
+      const drawResult = drawCardType(player, cardType);
+
+      if (drawResult.drewCard) {
+        battlecryMessages.push(`drew ${drawResult.cardName}`);
+      }
+
+      if (drawResult.burnedCard) {
+        battlecryMessages.push(`hand was full, ${drawResult.cardName} was burned`);
+      }
+
+      if (drawResult.noMatchingCard) {
+        battlecryMessages.push(`no ${cardType} found in deck`);
+      }
+    }
+  }
+
+  if (unit.battlecry.type === "draw_card_type_with_keyword") {
+    const amount = unit.battlecry.amount || 1;
+    const cardType = unit.battlecry.cardType;
+    const keyword = unit.battlecry.keyword;
+
+    for (let i = 0; i < amount; i++) {
+      const drawResult = drawCardTypeWithKeyword(player, cardType, keyword);
+
+      if (drawResult.drewCard) {
+        battlecryMessages.push(`drew ${drawResult.cardName}`);
+      }
+
+      if (drawResult.burnedCard) {
+        battlecryMessages.push(`hand was full, ${drawResult.cardName} was burned`);
+      }
+
+      if (drawResult.noMatchingCard) {
+        battlecryMessages.push(`no ${keyword} ${cardType} found in deck`);
+      }
+    }
+  }
+
+  if (unit.battlecry.type === "buff_self") {
+    const attackBuff = unit.battlecry.buff.attack || 0;
+    const healthBuff = unit.battlecry.buff.health || 0;
+
+    unit.attack += attackBuff;
+    unit.maxHealth += healthBuff;
+    unit.currentHealth += healthBuff;
+
+    battlecryMessages.push(`gained +${attackBuff}/+${healthBuff}`);
+  }
+
+  if (unit.battlecry.type === "damage_random_enemy_unit") {
+    if (enemyPlayer.board.length === 0) {
+      battlecryMessages.push("no enemy unit to damage");
+    } else {
+      const randomIndex = Math.floor(Math.random() * enemyPlayer.board.length);
+      const targetUnit = enemyPlayer.board[randomIndex];
+
+      const damageResult = dealDamageToUnit(targetUnit, unit.battlecry.damage);
+
+      if (damageResult.wasDodged) {
+        battlecryMessages.push(`${targetUnit.name} dodged`);
+      } else {
+        battlecryMessages.push(`dealt ${damageResult.actualDamage} damage to ${targetUnit.name}`);
+      }
+
+      if (targetUnit.currentHealth <= 0) {
+        enemyPlayer.board.splice(randomIndex, 1);
+        battlecryMessages.push(`${targetUnit.name} was destroyed`);
+      }
+    }
+  }
+
+  return battlecryMessages;
+}
+
+function drawCardTypeWithKeyword(player, cardType, keyword) {
+  const cardIndex = player.deck.findIndex(function (card) {
+    return (
+      card.type === cardType &&
+      card.keywords &&
+      card.keywords.includes(keyword)
+    );
+  });
+
+  if (cardIndex === -1) {
+    return {
+      drewCard: false,
+      burnedCard: false,
+      noMatchingCard: true,
+      cardName: null
+    };
+  }
+
+  const card = player.deck.splice(cardIndex, 1)[0];
+
+  if (player.hand.length >= MAX_HAND_SIZE) {
+    return {
+      drewCard: false,
+      burnedCard: true,
+      noMatchingCard: false,
+      cardName: card.name
+    };
+  }
+
+  player.hand.push(card);
+
+  return {
+    drewCard: true,
+    burnedCard: false,
+    noMatchingCard: false,
+    cardName: card.name
   };
 }
 
@@ -555,11 +715,22 @@ function playCard(cardIndex) {
   currentPlayer.board.push(unit);
   currentPlayer.hand.splice(cardIndex, 1);
 
+  const enemyPlayer = gameState.players[getEnemyPlayerIndex()];
+  const battlecryMessages = resolveBattlecry(currentPlayer, enemyPlayer, unit);
+
+  let message = "";
+
   if (hasKeyword(card, "Swift")) {
-    showMessage(`${card.name} was played. It can attack immediately!${igniteMessage}`);
+    message = `${card.name} was played. It can attack immediately!${igniteMessage}`;
   } else {
-    showMessage(`${card.name} was played. It can attack next turn.${igniteMessage}`);
+    message = `${card.name} was played. It can attack next turn.${igniteMessage}`;
   }
+
+  if (battlecryMessages.length > 0) {
+    message += ` Battlecry: ${battlecryMessages.join(", ")}.`;
+  }
+
+  showMessage(message);
 
   renderGame();
 }

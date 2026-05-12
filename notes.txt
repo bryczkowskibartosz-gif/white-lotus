@@ -134,13 +134,16 @@ For now, only do a mini balance sanity check:
 - Is any keyword impossible to activate?
 - Does the mechanic feel understandable?
 
-Current balance watchlist:
-- Lotus Seal costs 3 Chi, which may be expensive for a reaction card.
-- Fire has some Ignite support, but needs more aggressive options.
-- Water currently has the clearest identity because Flow already has multiple cards.
-- Crosswind Jab currently deals 3 damage for 1 Chi, but has a narrow summoned-unit condition.
-- Pebble Catcher Fortify +1/+1 may still be strong, but it is one-time only.
-- Wall Watcher gives Earth a stronger defensive identity.
+Added Battlecry mechanic:
+- Battlecry effects trigger after playing a unit.
+- Supported effects:
+  - Draw a card type.
+  - Draw a card type with a specific keyword.
+- Example cards:
+  - Army Recruiter
+  - Fiery Mercenary
+  - Lowly Armorsmith
+  - Village Recruiter
 
 Next steps:
 

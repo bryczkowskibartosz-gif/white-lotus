@@ -35,6 +35,57 @@ const fireUnits = [
     attack: 1,
     health: 1,
     text: "A quick recruit ready to prove himself."
+  },
+
+  {
+    id: "army_recruiter",
+    name: "Army Recruiter",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 2,
+    attack: 2,
+    health: 1,
+    battlecry: {
+      type: "draw_card_type",
+      cardType: "unit",
+      amount: 1
+    },
+    text: "Battlecry: Draw a unit."
+  },
+
+  {
+    id: "spark_thrower",
+    name: "Spark Thrower",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 3,
+    attack: 3,
+    health: 3,
+    battlecry: {
+      type: "damage_random_enemy_unit",
+      damage: 1
+    },
+    text: "Battlecry: Deal 1 damage to a random enemy unit."
+  },
+
+  {
+    id: "fiery_mercenary",
+    name: "Fiery Mercenary",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 4,
+    attack: 4,
+    health: 2,
+    battlecry: {
+      type: "draw_card_type_with_keyword",
+      cardType: "unit",
+      keyword: "Swift",
+      amount: 1
+    },
+    text: "Battlecry: Draw a Swift unit."
   }
 ];
 
@@ -181,6 +232,25 @@ const waterReactions = [];
 // --------------------------------------------------
 
 const earthUnits = [
+
+  {
+    id: "lowly_armorsmith",
+    name: "Lowly Armorsmith",
+    element: "Earth",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 1,
+    attack: 1,
+    health: 1,
+    battlecry: {
+      type: "draw_card_type_with_keyword",
+      cardType: "unit",
+      keyword: "Guard",
+      amount: 1
+    },
+    text: "Battlecry: Draw a Guard unit."
+  },
+
   {
     id: "stone_guardian",
     name: "Stone Guardian",
@@ -462,6 +532,39 @@ const neutralUnits = [
     attack: 2,
     health: 3,
     text: "A calm and collected individual who enjoys a good cup of tea."
+  },
+
+  {
+    id: "village_recruiter",
+    name: "Village Recruiter",
+    element: "Neutral",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 3,
+    attack: 2,
+    health: 2,
+    battlecry: {
+      type: "draw_card_type",
+      cardType: "unit",
+      amount: 1
+    },
+    text: "Battlecry: Draw a unit."
+  },
+
+  {
+    id: "confident_duelist",
+    name: "Confident Duelist",
+    element: "Neutral",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 3,
+    attack: 2,
+    health: 2,
+    battlecry: {
+      type: "buff_self",
+      buff: { attack: 1, health: 1 }
+    },
+    text: "Battlecry: Gain +1/+1."
   },
 
   {
