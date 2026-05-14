@@ -304,6 +304,19 @@ const earthUnits = [
 ];
 
 const earthSpells = [
+
+  {
+    id: "pebble_toss",
+    name: "Pebble Toss",
+    element: "Earth",
+    school: "Earthbending",
+    type: "spell",
+    cost: 1,
+    spellType: "damage_two_enemy_units",
+    damage: 1,
+    text: "Choose two enemy units. Deal 1 damage to them."
+  },
+
   {
     id: "burrow_into_earth",
     name: "Burrow into Earth",

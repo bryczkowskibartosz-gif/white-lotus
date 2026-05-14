@@ -88,18 +88,22 @@ const fireTestDeckIds = [
   "platypus_bear",
 
   "roadside_colossus",
-  "roadside_colossus",
 
-  "overbearing_teacher",
   "overbearing_teacher",
 
   "old_map",
-  "old_map"
+  "old_map",
+
+  "fire_nation_recruit",
+  "fire_nation_recruit"
 ];
 
 const earthTestDeckIds = [
   // Earth units — Guard / Fortify / defensive board
   "lowly_armorsmith",
+  "lowly_armorsmith",
+
+  "academy_student",
   "academy_student",
 
   "stone_guardian",
@@ -126,7 +130,6 @@ const earthTestDeckIds = [
   "overwhelming_weight",
 
   "splitting_rock",
-  "splitting_rock",
 
   "enduring_spirit",
   "enduring_spirit",
@@ -141,7 +144,7 @@ const earthTestDeckIds = [
   "roadside_colossus",
   "roadside_colossus",
 
-  "city_guard",
+  "pebble_toss",
   "city_guard",
 
   "old_map",
