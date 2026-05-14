@@ -168,8 +168,26 @@ const waterUnits = [
     keywords: ["Swift"],
     cost: 2,
     attack: 2,
-    health: 2,
+    health: 3,
     text: "Swift."
+  },
+
+  {
+    id: "stream_guide",
+    name: "Stream Guide",
+    element: "Water",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 2,
+    attack: 3,
+    health: 2,
+    battlecry: {
+      type: "draw_card_type_with_keyword",
+      cardType: "spell",
+      keyword: "Flow",
+      amount: 1
+    },
+    text: "Battlecry: Draw a Flow move."
   },
 
   {
@@ -177,10 +195,21 @@ const waterUnits = [
     name: "Waterbending Initiate",
     element: "Water",
     type: "unit",
-    cost: 2,
-    attack: 1,
-    health: 3,
+    cost: 3,
+    attack: 3,
+    health: 4,
     text: "A young Waterbender in training."
+  },
+
+  {
+    id: "river_guardian",
+    name: "River Guardian",
+    element: "Water",
+    type: "unit",
+    cost: 2,
+    attack: 2,
+    health: 4,
+    text: "A durable Water unit that works well with healing."
   }
 ];
 
@@ -194,8 +223,9 @@ const waterSpells = [
     keywords: ["Flow"],
     cost: 1,
     spellType: "heal_friendly_unit",
+    canTargetHero: true,
     heal: 2,
-    text: "Flow. Restore 2 HP to a friendly unit."
+    text: "Flow. Restore 2 HP to a friendly unit or your hero."
   },
 
   {
@@ -222,6 +252,19 @@ const waterSpells = [
     damage: 2,
     preventsNextAttack: true,
     text: "Deal 2 damage to an enemy unit. It can't attack next turn."
+  },
+
+  {
+    id: "tidal_splash",
+    name: "Tidal Splash",
+    element: "Water",
+    school: "Waterbending",
+    type: "spell",
+    keywords: ["Flow"],
+    cost: 3,
+    spellType: "damage_enemy_units",
+    damage: 1,
+    text: "Flow. Deal 1 damage to all enemy units."
   }
 ];
 
@@ -398,6 +441,32 @@ const earthReactions = [];
 // --------------------------------------------------
 
 const airUnits = [
+
+  {
+    id: "simple_monk",
+    name: "Simple Monk",
+    element: "Air",
+    type: "unit",
+    keywords: ["Dodge"],
+    cost: 1,
+    attack: 1,
+    health: 1,
+    text: "Dodge."
+  },
+
+  {
+    id: "gale_trainee",
+    name: "Gale Trainee",
+    element: "Air",
+    type: "unit",
+    keywords: ["Momentum"],
+    cost: 2,
+    attack: 2,
+    health: 2,
+    momentumBuff: { attack: 1, health: 1 },
+    text: "Momentum: Gain +1/+1."
+  },
+
   {
     id: "air_acolyte",
     name: "Air Acolyte",
@@ -408,6 +477,17 @@ const airUnits = [
     attack: 3,
     health: 1,
     text: "Dodge."
+  },
+
+  {
+    id: "airheaded_student",
+    name: "Airheaded Student",
+    element: "Air",
+    type: "unit",
+    cost: 3,
+    attack: 3,
+    health: 4,
+    text: "A quick Air student learning to control the wind."
   }
 ];
 
@@ -526,6 +606,22 @@ const neutralUnits = [
   },
 
   {
+    id: "traveling_cook",
+    name: "Traveling Cook",
+    element: "Neutral",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 2,
+    attack: 2,
+    health: 2,
+    battlecry: {
+      type: "gain_hero_health",
+      heal: 2
+    },
+    text: "Battlecry: Your Hero gains 2 HP."
+  },
+
+  {
     id: "harbor_brawler",
     name: "Harbor Brawler",
     element: "Neutral",
@@ -602,6 +698,22 @@ const neutralUnits = [
     attack: 3,
     health: 1,
     text: "Swift. A mischievous troublemaker who can't sit still."
+  },
+
+  {
+    id: "scroll_keeper",
+    name: "Scroll Keeper",
+    element: "Neutral",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 4,
+    attack: 4,
+    health: 4,
+    battlecry: {
+      type: "buff_random_other_friendly_unit",
+      buff: { attack: 2, health: 1 }
+    },
+    text: "Battlecry: Give another random friendly unit +2/+1."
   },
 
   {

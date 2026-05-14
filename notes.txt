@@ -255,3 +255,10 @@ Current balance testing:
 - Fire needs early pressure and card draw to avoid topdeck mode.
 - Earth stabilizes with Guard, Fortify and buffs.
 - War Drums, Fire Nation Recruit, Traveler's Rations and Bending Scroll changes need more testing.
+
+Latest update:
+- Added stronger Water identity cards and neutral minion support.
+- Removed / deprioritized neutral spells for now.
+- Air vs Water test decks are now more playable.
+- Air has better Momentum payoff.
+- Water now has better board presence and Flow support.

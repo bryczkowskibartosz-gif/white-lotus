@@ -1,6 +1,7 @@
 const TEST_MODE = false;
 const USE_FIXED_DECKS = true;
 const SHUFFLE_DECKS = true;
+const TEST_MATCHUP = "air_vs_water";
 
 const MAX_BOARD_SIZE = 5;
 const MAX_HAND_SIZE = 10;
@@ -84,8 +85,8 @@ const fireTestDeckIds = [
   "young_rascal",
   "young_rascal",
 
-  "platypus_bear",
-  "platypus_bear",
+  "traveling_cook",
+  "traveling_cook",
 
   "roadside_colossus",
 
@@ -145,10 +146,114 @@ const earthTestDeckIds = [
   "roadside_colossus",
 
   "pebble_toss",
-  "city_guard",
 
   "old_map",
   "old_map"
+];
+
+const airTestDeckIds = [
+  // Air units — Dodge / Momentum / tempo
+  "simple_monk",
+  "simple_monk",
+
+  "gale_trainee",
+  "gale_trainee",
+
+  "air_acolyte",
+  "air_acolyte",
+
+  "airheaded_student",
+  "airheaded_student",
+
+  // Air spells — Momentum payoff / board control
+  "sweeping_strikes",
+  "sweeping_strikes",
+
+  "wind_slice",
+  "wind_slice",
+
+  // Air reactions — enough to activate Momentum, not enough to brick hand
+  "banish",
+
+  "be_the_leaf",
+  "be_the_leaf",
+
+  "gust_snare",
+
+  "crosswind_jab",
+  "crosswind_jab",
+
+  "sudden_gale",
+
+  // Neutral cards — proactive pressure / tempo / draw
+  "wandering_merchant",
+  "wandering_merchant",
+
+  "harbor_brawler",
+  "harbor_brawler",
+
+  "young_rascal",
+  "young_rascal",
+
+  "confident_duelist",
+  "confident_duelist",
+
+  "old_map",
+
+  "traveling_cook",
+  "traveling_cook"
+];
+
+const waterTestDeckIds = [
+  // Water units — sticky board / Flow support
+  "southern_sailor",
+  "southern_sailor",
+
+  "stream_guide",
+  "stream_guide",
+
+  "river_guardian",
+  "river_guardian",
+
+  "waterbending_initiate",
+  "waterbending_initiate",
+
+  // Water Flow spells — flexibility / sustain / board control
+  "flowing_touch",
+  "flowing_touch",
+
+  "river_spark",
+  "river_spark",
+
+  "tidal_splash",
+  "tidal_splash",
+
+  // Water tempo spell
+  "ice_blast",
+  "ice_blast",
+
+  // Neutral early units — board presence
+  "turtle_duck",
+  "turtle_duck",
+
+  "tea_house_patron",
+  "tea_house_patron",
+
+  "harbor_brawler",
+  "harbor_brawler",
+
+  // Neutral value / sustain / light finishers
+  "scroll_keeper",
+  "scroll_keeper",
+
+  "old_map",
+  "old_map",
+
+  "traveling_cook",
+  "traveling_cook",
+
+  "roadside_colossus",
+  "roadside_colossus"
 ];
 
 function getCardById(cardId) {
@@ -220,8 +325,15 @@ function startGame() {
   const player2 = gameState.players[1];
 
   if (USE_FIXED_DECKS) {
-    player1.deck = buildDeck(fireTestDeckIds);
-    player2.deck = buildDeck(earthTestDeckIds);
+    if (TEST_MATCHUP === "fire_vs_earth") {
+      player1.deck = buildDeck(fireTestDeckIds);
+      player2.deck = buildDeck(earthTestDeckIds);
+    }
+
+    if (TEST_MATCHUP === "air_vs_water") {
+      player1.deck = buildDeck(airTestDeckIds);
+      player2.deck = buildDeck(waterTestDeckIds);
+    }
   } else {
     player1.deck = [...cards, ...cards, ...cards];
     player2.deck = [...cards, ...cards, ...cards];
@@ -393,6 +505,36 @@ function resolveBattlecry(player, enemyPlayer, unit) {
     unit.currentHealth += healthBuff;
 
     battlecryMessages.push(`gained +${attackBuff}/+${healthBuff}`);
+  }
+
+  if (unit.battlecry.type === "gain_hero_health") {
+    const heal = unit.battlecry.heal || 0;
+
+    player.hp += heal;
+
+    battlecryMessages.push(`gained ${heal} HP`);
+  }
+
+  if (unit.battlecry.type === "buff_random_other_friendly_unit") {
+    const possibleTargets = player.board.filter(function (friendlyUnit) {
+      return friendlyUnit !== unit;
+    });
+
+    if (possibleTargets.length === 0) {
+      battlecryMessages.push("no other friendly unit to buff");
+    } else {
+      const randomIndex = Math.floor(Math.random() * possibleTargets.length);
+      const targetUnit = possibleTargets[randomIndex];
+
+      const attackBuff = unit.battlecry.buff.attack || 0;
+      const healthBuff = unit.battlecry.buff.health || 0;
+
+      targetUnit.attack += attackBuff;
+      targetUnit.maxHealth += healthBuff;
+      targetUnit.currentHealth += healthBuff;
+
+      battlecryMessages.push(`${targetUnit.name} gained +${attackBuff}/+${healthBuff}`);
+    }
   }
 
   if (unit.battlecry.type === "damage_random_enemy_unit") {
@@ -576,6 +718,14 @@ function selectedSpellTargetsEnemyUnits(card) {
   );
 }
 
+function selectedSpellCanTargetFriendlyHero(card) {
+  return (
+    card &&
+    card.type === "spell" &&
+    card.canTargetHero === true
+  );
+}
+
 function selectedSpellTargetsFriendlyUnits(card) {
   return (
     card &&
@@ -688,16 +838,34 @@ function playCard(cardIndex) {
 
   let attack = card.attack;
   let health = card.health;
-  let igniteMessage = "";
+  let bonusMessage = "";
 
   if (
     hasKeyword(card, "Ignite") &&
     isIgniteActive(currentPlayer) &&
     card.igniteBuff
   ) {
-    attack += card.igniteBuff.attack;
-    health += card.igniteBuff.health;
-    igniteMessage = ` Ignite activated: +${card.igniteBuff.attack}/+${card.igniteBuff.health}.`;
+    const attackBuff = card.igniteBuff.attack || 0;
+    const healthBuff = card.igniteBuff.health || 0;
+
+    attack += attackBuff;
+    health += healthBuff;
+
+    bonusMessage += ` Ignite activated: +${attackBuff}/+${healthBuff}.`;
+  }
+
+  if (
+    hasKeyword(card, "Momentum") &&
+    currentPlayer.momentumActive &&
+    card.momentumBuff
+  ) {
+    const attackBuff = card.momentumBuff.attack || 0;
+    const healthBuff = card.momentumBuff.health || 0;
+
+    attack += attackBuff;
+    health += healthBuff;
+
+    bonusMessage += ` Momentum activated: +${attackBuff}/+${healthBuff}.`;
   }
 
   const unit = {
@@ -724,9 +892,9 @@ function playCard(cardIndex) {
   let message = "";
 
   if (hasKeyword(card, "Swift")) {
-    message = `${card.name} was played. It can attack immediately!${igniteMessage}`;
+    message = `${card.name} was played. It can attack immediately!${bonusMessage}`;
   } else {
-    message = `${card.name} was played. It can attack next turn.${igniteMessage}`;
+    message = `${card.name} was played. It can attack next turn.${bonusMessage}`;
   }
 
   if (battlecryMessages.length > 0) {
@@ -1610,6 +1778,47 @@ function castNoTargetSpell() {
   showMessage("This no-target spell effect is not implemented yet.");
 }
 
+function castSpellOnFriendlyHero() {
+  if (gameState.gameOver) {
+    return;
+  }
+
+  if (gameState.selectedSpellCardIndex === null) {
+    return;
+  }
+
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const spellCard = currentPlayer.hand[gameState.selectedSpellCardIndex];
+
+  if (!selectedSpellCanTargetFriendlyHero(spellCard)) {
+    return;
+  }
+
+  const canCastDuringAction = gameState.phase === "action";
+  const canCastDuringReaction =
+    gameState.phase === "reaction" && hasKeyword(spellCard, "Flow");
+
+  if (!canCastDuringAction && !canCastDuringReaction) {
+    showMessage("This move cannot be played during this phase.");
+    return;
+  }
+
+  if (currentPlayer.currentChi < spellCard.cost) {
+    showMessage("Not enough Chi for this move.");
+    return;
+  }
+
+  currentPlayer.currentChi -= spellCard.cost;
+  currentPlayer.hp += spellCard.heal;
+
+  currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+  gameState.selectedSpellCardIndex = null;
+
+  showMessage(`${spellCard.name} restored ${spellCard.heal} HP to ${currentPlayer.name}.`);
+
+  renderGame();
+}
+
 function castSpellOnFriendlyUnit(friendlyUnitIndex) {
   if (gameState.gameOver) {
     return;
@@ -1962,10 +2171,10 @@ function renderHand(player) {
       cardElement.classList.add("selected-spell-card");
     }
 
-    cardElement.addEventListener("click", function () {
+    cardElement.addEventListener("click", function (event) {
+      event.stopPropagation();
       playCard(index);
     });
-
     let cardDetails = "";
 
     if (card.type === "unit") {
@@ -2033,7 +2242,8 @@ function renderBoard(player, boardId) {
     if (boardId === "player-board") {
       const selectedSpell = getSelectedSpell();
 
-      cardElement.addEventListener("click", function () {
+      cardElement.addEventListener("click", function (event) {
+        event.stopPropagation();
         const selectedSpell = getSelectedSpell();
         const selectedReaction =
           gameState.selectedReactionCardIndex !== null
@@ -2249,5 +2459,6 @@ document.getElementById("end-turn-button").addEventListener("click", endTurn);
 document.getElementById("restart-button").addEventListener("click", startGame);
 document.getElementById("win-restart-button").addEventListener("click", startGame);
 document.querySelector(".enemy").addEventListener("click", attackEnemyHero);
+document.querySelector(".current").addEventListener("click", castSpellOnFriendlyHero);
 
 startGame();
