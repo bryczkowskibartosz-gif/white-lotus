@@ -236,3 +236,11 @@ button:hover {
   margin-top: 16px;
   background: #d6ecff;
 }
+
+#copy-log-button {
+  background: #e7d6ff;
+}
+
+#win-copy-log-button {
+  background: #e7d6ff;
+}

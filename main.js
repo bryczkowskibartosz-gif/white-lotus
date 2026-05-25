@@ -9,6 +9,8 @@ const MAX_HAND_SIZE = 10;
 const gameState = {
   currentPlayerIndex: 0,
   phase: "action",
+  turnNumber: 1,
+  gameLog: [],
   selectedAttackerIndex: null,
   selectedReactionCardIndex: null,
   selectedSpellCardIndex: null,
@@ -162,8 +164,11 @@ const airTestDeckIds = [
   "air_acolyte",
   "air_acolyte",
 
-  "airheaded_student",
-  "airheaded_student",
+  "skyline_courier",
+  "skyline_courier",
+
+  "windstep_duelist",
+  "windstep_duelist",
 
   // Air spells — Momentum payoff / board control
   "sweeping_strikes",
@@ -172,12 +177,10 @@ const airTestDeckIds = [
   "wind_slice",
   "wind_slice",
 
-  // Air reactions — enough to activate Momentum, not enough to brick hand
-  "banish",
+  "open_sky_training",
+  "open_sky_training",
 
-  "be_the_leaf",
-  "be_the_leaf",
-
+  // Air reactions — fewer friendly-only reactions, less dead hand
   "gust_snare",
 
   "crosswind_jab",
@@ -195,13 +198,11 @@ const airTestDeckIds = [
   "young_rascal",
   "young_rascal",
 
-  "confident_duelist",
-  "confident_duelist",
+  "turtle_duck",
+  "turtle_duck",
 
-  "old_map",
-
-  "traveling_cook",
-  "traveling_cook"
+  "confident_duelist",
+  "confident_duelist"
 ];
 
 const waterTestDeckIds = [
@@ -306,6 +307,8 @@ function resetPlayer(player) {
 function resetGameState() {
   gameState.currentPlayerIndex = 0;
   gameState.phase = "action";
+  gameState.turnNumber = 1;
+  gameState.gameLog = [];
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
@@ -609,9 +612,21 @@ function drawStartingCard(player) {
   }
 }
 
+function addGameLogEntry(message) {
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const playerName = currentPlayer ? currentPlayer.name : "System";
+  const phaseName = getPhaseName();
+
+  const logEntry = `[Turn ${gameState.turnNumber} | ${phaseName} | ${playerName}] ${message}`;
+
+  gameState.gameLog.push(logEntry);
+}
+
 function showMessage(message) {
   const messageElement = document.getElementById("game-message");
   messageElement.textContent = message;
+
+  addGameLogEntry(message);
 }
 
 function showWinScreen(winnerName) {
@@ -634,6 +649,24 @@ function hideWinScreen() {
   }
 
   winScreen.classList.add("hidden");
+}
+
+function copyGameLog() {
+  if (gameState.gameLog.length === 0) {
+    showMessage("Game log is empty.");
+    return;
+  }
+
+  const fullLog = gameState.gameLog.join("\n");
+
+  navigator.clipboard.writeText(fullLog)
+    .then(function () {
+      showMessage("Game log copied to clipboard.");
+    })
+    .catch(function () {
+      console.log(fullLog);
+      showMessage("Could not copy log. Game log was printed in the console.");
+    });
 }
 
 function clearSelection(message) {
@@ -1261,6 +1294,8 @@ function startReactionPhase() {
 }
 
 function startActionPhase() {
+  gameState.turnNumber += 1;
+
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
@@ -1416,6 +1451,11 @@ function selectAttacker(unitIndex) {
 
   if (!unit.canAttack || unit.hasAttacked) {
     showMessage(`${unit.name} cannot attack right now.`);
+    return;
+  }
+
+  if (unit.attack <= 0) {
+    showMessage(`${unit.name} has 0 Attack and cannot attack.`);
     return;
   }
 
@@ -1727,6 +1767,15 @@ function castNoTargetSpell() {
       drawAmount += spellCard.igniteDrawAmount;
     }
 
+    const momentumWasActive =
+      hasKeyword(spellCard, "Momentum") &&
+      currentPlayer.momentumActive &&
+      spellCard.momentumDrawAmount;
+
+    if (momentumWasActive) {
+      drawAmount += spellCard.momentumDrawAmount;
+    }
+
     const drawMessages = [];
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
@@ -1745,6 +1794,10 @@ function castNoTargetSpell() {
 
       if (drawResult.fatigueDamage > 0) {
         drawMessages.push(`took ${drawResult.fatigueDamage} fatigue damage`);
+      }
+
+      if (momentumWasActive) {
+        message += " Momentum activated.";
       }
     }
 
@@ -1936,6 +1989,13 @@ function attackEnemyUnit(enemyUnitIndex) {
     return;
   }
 
+  if (attacker.attack <= 0) {
+    showMessage(`${attacker.name} has 0 Attack and cannot attack.`);
+    gameState.selectedAttackerIndex = null;
+    renderGame();
+    return;
+  }
+
   if (playerHasGuardUnit(enemyPlayer) && !hasKeyword(defender, "Guard")) {
     showMessage("Enemy has a Guard unit. You must attack it first.");
     return;
@@ -2025,6 +2085,13 @@ function attackEnemyHero() {
   if (!attacker.canAttack || attacker.hasAttacked) {
     showMessage(`${attacker.name} cannot attack right now.`);
     gameState.selectedAttackerIndex = null;
+    return;
+  }
+
+  if (attacker.attack <= 0) {
+    showMessage(`${attacker.name} has 0 Attack and cannot attack.`);
+    gameState.selectedAttackerIndex = null;
+    renderGame();
     return;
   }
 
@@ -2460,5 +2527,7 @@ document.getElementById("restart-button").addEventListener("click", startGame);
 document.getElementById("win-restart-button").addEventListener("click", startGame);
 document.querySelector(".enemy").addEventListener("click", attackEnemyHero);
 document.querySelector(".current").addEventListener("click", castSpellOnFriendlyHero);
+document.getElementById("copy-log-button").addEventListener("click", copyGameLog);
+document.getElementById("win-copy-log-button").addEventListener("click", copyGameLog);
 
 startGame();

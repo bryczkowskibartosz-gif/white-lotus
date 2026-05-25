@@ -480,6 +480,24 @@ const airUnits = [
   },
 
   {
+    id: "skyline_courier",
+    name: "Skyline Courier",
+    element: "Air",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 2,
+    attack: 2,
+    health: 2,
+    battlecry: {
+      type: "draw_card_type_with_keyword",
+      cardType: "spell",
+      keyword: "Momentum",
+      amount: 1
+    },
+    text: "Battlecry: Draw a Momentum move."
+  },
+
+  {
     id: "airheaded_student",
     name: "Airheaded Student",
     element: "Air",
@@ -488,7 +506,19 @@ const airUnits = [
     attack: 3,
     health: 4,
     text: "A quick Air student learning to control the wind."
-  }
+  },
+
+  {
+    id: "windstep_duelist",
+    name: "Windstep Duelist",
+    element: "Air",
+    type: "unit",
+    keywords: ["Dodge"],
+    cost: 3,
+    attack: 3,
+    health: 3,
+    text: "Dodge."
+  },
 ];
 
 const airSpells = [
@@ -499,7 +529,7 @@ const airSpells = [
     school: "Airbending",
     type: "spell",
     keywords: ["Momentum"],
-    cost: 3,
+    cost: 2,
     spellType: "damage_enemy_units",
     damage: 1,
     text: "Deal 1 damage to all enemy units. Momentum: Do it again."
@@ -515,7 +545,21 @@ const airSpells = [
     spellType: "damage_two_enemy_units",
     damage: 2,
     text: "Choose two enemy units. Deal 2 damage to them."
-  }
+  },
+
+  {
+    id: "open_sky_training",
+    name: "Open Sky Training",
+    element: "Air",
+    school: "Airbending",
+    type: "spell",
+    keywords: ["Momentum"],
+    cost: 2,
+    spellType: "draw_cards",
+    drawAmount: 1,
+    momentumDrawAmount: 1,
+    text: "Draw 1 card. Momentum: Draw 1 more."
+  },
 ];
 
 const airReactions = [
