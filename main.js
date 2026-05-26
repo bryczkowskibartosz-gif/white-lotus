@@ -161,13 +161,15 @@ const airTestDeckIds = [
   "gale_trainee",
   "gale_trainee",
 
+  "wind_reader",
+  "wind_reader",
+
   "air_acolyte",
   "air_acolyte",
 
   "skyline_courier",
   "skyline_courier",
 
-  "windstep_duelist",
   "windstep_duelist",
 
   // Air spells — Momentum payoff / board control
@@ -188,6 +190,8 @@ const airTestDeckIds = [
 
   "sudden_gale",
 
+  "banish",
+
   // Neutral cards — proactive pressure / tempo / draw
   "wandering_merchant",
   "wandering_merchant",
@@ -199,9 +203,7 @@ const airTestDeckIds = [
   "young_rascal",
 
   "turtle_duck",
-  "turtle_duck",
 
-  "confident_duelist",
   "confident_duelist"
 ];
 
@@ -376,6 +378,7 @@ function startGame() {
   }
 
   showMessage("Player 1 starts the game. Action Phase.");
+  logGameStateSnapshot("START GAME");
 
   renderGame();
 }
@@ -513,7 +516,7 @@ function resolveBattlecry(player, enemyPlayer, unit) {
   if (unit.battlecry.type === "gain_hero_health") {
     const heal = unit.battlecry.heal || 0;
 
-    player.hp += heal;
+    gainHeroHealth(player, heal);
 
     battlecryMessages.push(`gained ${heal} HP`);
   }
@@ -612,6 +615,96 @@ function drawStartingCard(player) {
   }
 }
 
+function formatUnitForLog(unit) {
+  const keywordText =
+    unit.keywords && unit.keywords.length > 0
+      ? ` [${unit.keywords.join(", ")}]`
+      : "";
+
+  const statusParts = [];
+
+  if (unit.canAttack && !unit.hasAttacked) {
+    statusParts.push("Ready");
+  } else {
+    statusParts.push("Exhausted");
+  }
+
+  if (unit.summonedThisTurn) {
+    statusParts.push("New");
+  }
+
+  if (hasKeyword(unit, "Dodge")) {
+    statusParts.push(unit.dodgeUsed ? "Dodge used" : "Dodge ready");
+  }
+
+  if (hasKeyword(unit, "Fortify")) {
+    statusParts.push(unit.fortifyUsed ? "Fortify used" : "Fortify ready");
+  }
+
+  if (unit.skipNextAttack) {
+    statusParts.push("Skip next attack");
+  }
+
+  if (unit.frozenThisTurn) {
+    statusParts.push("Frozen this turn");
+  }
+
+  return `${unit.name} ${unit.attack}/${unit.currentHealth}/${unit.maxHealth}${keywordText} (${statusParts.join(", ")})`;
+}
+
+function formatBoardForLog(player) {
+  if (player.board.length === 0) {
+    return "empty";
+  }
+
+  return player.board.map(formatUnitForLog).join(" | ");
+}
+
+function formatHandForLog(player) {
+  if (player.hand.length === 0) {
+    return "empty";
+  }
+
+  return player.hand
+    .map(function (card) {
+      return `${card.name} (${card.cost})`;
+    })
+    .join(", ");
+}
+
+function logGameStateSnapshot(label) {
+  const player1 = gameState.players[0];
+  const player2 = gameState.players[1];
+
+  addGameLogEntry(`--- ${label} SNAPSHOT ---`);
+
+  addGameLogEntry(
+    `${player1.name}: HP ${player1.hp} | Chi ${player1.currentChi}/${player1.maxChi} | Hand ${player1.hand.length} | Deck ${player1.deck.length} | Fatigue ${player1.fatigueDamage} | Momentum ${player1.momentumActive ? "ON" : "OFF"}`
+  );
+
+  addGameLogEntry(
+    `${player1.name} hand: ${formatHandForLog(player1)}`
+  );
+
+  addGameLogEntry(
+    `${player1.name} board: ${formatBoardForLog(player1)}`
+  );
+
+  addGameLogEntry(
+    `${player2.name}: HP ${player2.hp} | Chi ${player2.currentChi}/${player2.maxChi} | Hand ${player2.hand.length} | Deck ${player2.deck.length} | Fatigue ${player2.fatigueDamage} | Momentum ${player2.momentumActive ? "ON" : "OFF"}`
+  );
+
+  addGameLogEntry(
+    `${player2.name} hand: ${formatHandForLog(player2)}`
+  );
+
+  addGameLogEntry(
+    `${player2.name} board: ${formatBoardForLog(player2)}`
+  );
+
+  addGameLogEntry(`--- END SNAPSHOT ---`);
+}
+
 function addGameLogEntry(message) {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const playerName = currentPlayer ? currentPlayer.name : "System";
@@ -691,6 +784,18 @@ function playerHasGuardUnit(player) {
   return player.board.some(function (unit) {
     return hasKeyword(unit, "Guard");
   });
+}
+
+function restoreHeroHealth(player, amount) {
+  player.hp += amount;
+
+  if (player.hp > player.maxHp) {
+    player.hp = player.maxHp;
+  }
+}
+
+function gainHeroHealth(player, amount) {
+  player.hp += amount;
 }
 
 function dealDamageToUnit(unit, damage) {
@@ -1273,6 +1378,8 @@ function endTurn() {
 }
 
 function startReactionPhase() {
+  logGameStateSnapshot("END ACTION PHASE");
+
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
@@ -1366,6 +1473,7 @@ function startActionPhase() {
   }
 
   showMessage(actionPhaseMessage);
+  logGameStateSnapshot("START ACTION PHASE");
 
   renderGame();
 }
@@ -1795,16 +1903,20 @@ function castNoTargetSpell() {
       if (drawResult.fatigueDamage > 0) {
         drawMessages.push(`took ${drawResult.fatigueDamage} fatigue damage`);
       }
-
-      if (momentumWasActive) {
-        message += " Momentum activated.";
-      }
     }
 
     let message = `${spellCard.name}: drew ${drawAmount} card(s).`;
 
     if (igniteWasActive && spellCard.igniteDrawAmount) {
       message += " Ignite activated.";
+    }
+
+    if (momentumWasActive) {
+      message += " Momentum activated.";
+    }
+
+    if (drawMessages.length > 0) {
+      message += ` ${drawMessages.join(", ")}.`;
     }
 
     showMessage(message);

@@ -455,6 +455,23 @@ const airUnits = [
   },
 
   {
+    id: "wind_reader",
+    name: "Wind Reader",
+    element: "Air",
+    type: "unit",
+    keywords: ["Battlecry"],
+    cost: 2,
+    attack: 1,
+    health: 3,
+    battlecry: {
+      type: "draw_card_type",
+      cardType: "reaction",
+      amount: 1
+    },
+    text: "Battlecry: Draw a Reaction."
+  },
+
+  {
     id: "gale_trainee",
     name: "Gale Trainee",
     element: "Air",
@@ -751,8 +768,8 @@ const neutralUnits = [
     type: "unit",
     keywords: ["Battlecry"],
     cost: 4,
-    attack: 4,
-    health: 4,
+    attack: 3,
+    health: 3,
     battlecry: {
       type: "buff_random_other_friendly_unit",
       buff: { attack: 2, health: 1 }
