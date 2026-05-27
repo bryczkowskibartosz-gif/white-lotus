@@ -1,7 +1,9 @@
 const TEST_MODE = false;
 const USE_FIXED_DECKS = true;
 const SHUFFLE_DECKS = true;
-const TEST_MATCHUP = "air_vs_water";
+
+const DEFAULT_PLAYER_1_ELEMENT = "Air";
+const DEFAULT_PLAYER_2_ELEMENT = "Water";
 
 const MAX_BOARD_SIZE = 5;
 const MAX_HAND_SIZE = 10;
@@ -259,6 +261,63 @@ const waterTestDeckIds = [
   "roadside_colossus"
 ];
 
+const elementTestDecks = {
+  Fire: fireTestDeckIds,
+  Air: airTestDeckIds,
+  Earth: earthTestDeckIds,
+  Water: waterTestDeckIds
+};
+
+const matchupSettings = {
+  player1Element: DEFAULT_PLAYER_1_ELEMENT,
+  player2Element: DEFAULT_PLAYER_2_ELEMENT
+};
+
+function getDeckIdsForElement(elementName) {
+  const deckIds = elementTestDecks[elementName];
+
+  if (!deckIds) {
+    console.error(`No test deck found for element: ${elementName}`);
+    return [];
+  }
+
+  return deckIds;
+}
+
+function updateMatchupSettingsFromUI() {
+  const player1Select = document.getElementById("player1-element-select");
+  const player2Select = document.getElementById("player2-element-select");
+
+  if (player1Select) {
+    matchupSettings.player1Element = player1Select.value;
+  }
+
+  if (player2Select) {
+    matchupSettings.player2Element = player2Select.value;
+  }
+}
+
+function setupMatchupSelector() {
+  const player1Select = document.getElementById("player1-element-select");
+  const player2Select = document.getElementById("player2-element-select");
+  const startMatchupButton = document.getElementById("start-matchup-button");
+
+  if (player1Select) {
+    player1Select.value = matchupSettings.player1Element;
+  }
+
+  if (player2Select) {
+    player2Select.value = matchupSettings.player2Element;
+  }
+
+  if (startMatchupButton) {
+    startMatchupButton.addEventListener("click", function () {
+      updateMatchupSettingsFromUI();
+      startGame();
+    });
+  }
+}
+
 function getCardById(cardId) {
   const foundCard = cards.find(function (card) {
     return card.id === cardId;
@@ -323,22 +382,19 @@ function resetGameState() {
 }
 
 function startGame() {
+  updateMatchupSettingsFromUI();
   resetGameState();
   hideWinScreen();
 
   const player1 = gameState.players[0];
   const player2 = gameState.players[1];
 
-  if (USE_FIXED_DECKS) {
-    if (TEST_MATCHUP === "fire_vs_earth") {
-      player1.deck = buildDeck(fireTestDeckIds);
-      player2.deck = buildDeck(earthTestDeckIds);
-    }
+  player1.name = `Player 1 (${matchupSettings.player1Element})`;
+  player2.name = `Player 2 (${matchupSettings.player2Element})`;
 
-    if (TEST_MATCHUP === "air_vs_water") {
-      player1.deck = buildDeck(airTestDeckIds);
-      player2.deck = buildDeck(waterTestDeckIds);
-    }
+  if (USE_FIXED_DECKS) {
+    player1.deck = buildDeck(getDeckIdsForElement(matchupSettings.player1Element));
+    player2.deck = buildDeck(getDeckIdsForElement(matchupSettings.player2Element));
   } else {
     player1.deck = [...cards, ...cards, ...cards];
     player2.deck = [...cards, ...cards, ...cards];
@@ -377,7 +433,7 @@ function startGame() {
     player2.hasHadActionPhase = false;
   }
 
-  showMessage("Player 1 starts the game. Action Phase.");
+  showMessage(`${player1.name} starts the game. Action Phase.`);
   logGameStateSnapshot("START GAME");
 
   renderGame();
@@ -722,15 +778,41 @@ function showMessage(message) {
   addGameLogEntry(message);
 }
 
-function showWinScreen(winnerName) {
+function getMatchSummaryHtml(winnerPlayer, loserPlayer) {
+  const highestMaxChi = Math.max(winnerPlayer.maxChi, loserPlayer.maxChi);
+
+  return `
+    <p><strong>Winner:</strong> ${winnerPlayer.name}</p>
+    <p><strong>Loser:</strong> ${loserPlayer.name}</p>
+    <p><strong>Ended on turn:</strong> ${gameState.turnNumber}</p>
+    <p><strong>Highest Chi reached:</strong> ${highestMaxChi}</p>
+    <hr />
+    <p><strong>${winnerPlayer.name} HP:</strong> ${winnerPlayer.hp}</p>
+    <p><strong>${winnerPlayer.name} deck:</strong> ${winnerPlayer.deck.length}</p>
+    <p><strong>${winnerPlayer.name} hand:</strong> ${winnerPlayer.hand.length}</p>
+    <p><strong>${winnerPlayer.name} board:</strong> ${winnerPlayer.board.length}</p>
+    <p><strong>${winnerPlayer.name} fatigue:</strong> ${winnerPlayer.fatigueDamage}</p>
+    <hr />
+    <p><strong>${loserPlayer.name} HP:</strong> ${loserPlayer.hp}</p>
+    <p><strong>${loserPlayer.name} deck:</strong> ${loserPlayer.deck.length}</p>
+    <p><strong>${loserPlayer.name} hand:</strong> ${loserPlayer.hand.length}</p>
+    <p><strong>${loserPlayer.name} board:</strong> ${loserPlayer.board.length}</p>
+    <p><strong>${loserPlayer.name} fatigue:</strong> ${loserPlayer.fatigueDamage}</p>
+  `;
+}
+
+function showWinScreen(winnerPlayer, loserPlayer) {
   const winScreen = document.getElementById("win-screen");
   const winTitle = document.getElementById("win-title");
+  const matchSummary = document.getElementById("match-summary");
 
-  if (!winScreen || !winTitle) {
+  if (!winScreen || !winTitle || !matchSummary) {
     return;
   }
 
-  winTitle.textContent = `${winnerName} wins!`;
+  winTitle.textContent = `${winnerPlayer.name} wins!`;
+  matchSummary.innerHTML = getMatchSummaryHtml(winnerPlayer, loserPlayer);
+
   winScreen.classList.remove("hidden");
 }
 
@@ -2233,15 +2315,15 @@ function checkGameOver() {
 
   if (player1.hp <= 0) {
     gameState.gameOver = true;
-    showMessage("Player 2 wins!");
-    showWinScreen("Player 2");
+    showMessage(`${player2.name} wins!`);
+    showWinScreen(player2, player1);
     return;
   }
 
   if (player2.hp <= 0) {
     gameState.gameOver = true;
-    showMessage("Player 1 wins!");
-    showWinScreen("Player 1");
+    showMessage(`${player1.name} wins!`);
+    showWinScreen(player1, player2);
     return;
   }
 }
@@ -2642,4 +2724,5 @@ document.querySelector(".current").addEventListener("click", castSpellOnFriendly
 document.getElementById("copy-log-button").addEventListener("click", copyGameLog);
 document.getElementById("win-copy-log-button").addEventListener("click", copyGameLog);
 
+setupMatchupSelector();
 startGame();

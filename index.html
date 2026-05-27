@@ -13,6 +13,32 @@
 <body>
   <h1>The White Lotus</h1>
 
+  <section id="matchup-controls" class="matchup-controls">
+    <h2>Matchup Selector</h2>
+
+    <div class="matchup-row">
+      <label for="player1-element-select">Player 1</label>
+      <select id="player1-element-select">
+        <option value="Fire">Fire</option>
+        <option value="Air" selected>Air</option>
+        <option value="Earth">Earth</option>
+        <option value="Water">Water</option>
+      </select>
+
+      <span class="versus-label">vs</span>
+
+      <label for="player2-element-select">Player 2</label>
+      <select id="player2-element-select">
+        <option value="Fire">Fire</option>
+        <option value="Air">Air</option>
+        <option value="Earth">Earth</option>
+        <option value="Water" selected>Water</option>
+      </select>
+
+      <button id="start-matchup-button">Start Matchup</button>
+    </div>
+  </section>
+
   <div id="game">
     <section class="player-area enemy">
       <h2 id="enemy-name">Player 2</h2>
@@ -52,7 +78,10 @@
   <div id="win-screen" class="win-screen hidden">
     <div class="win-panel">
       <h2 id="win-title">Player wins!</h2>
-      <p>The match is over.</p>
+
+      <div id="match-summary" class="match-summary">
+        <p>The match is over.</p>
+      </div>
 
       <div class="button-row">
         <button id="win-copy-log-button">Copy Game Log</button>

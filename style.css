@@ -244,3 +244,65 @@ button:hover {
 #win-copy-log-button {
   background: #e7d6ff;
 }
+
+.matchup-controls {
+  max-width: 1000px;
+  margin: 0 auto 20px;
+  background: #2f3136;
+  border: 2px solid #555;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.matchup-controls h2 {
+  margin-top: 0;
+  color: #f4e4b8;
+}
+
+.matchup-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.matchup-row label {
+  font-weight: bold;
+}
+
+.matchup-row select {
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 2px solid #f4e4b8;
+  border-radius: 8px;
+  background: #202124;
+  color: white;
+}
+
+.versus-label {
+  color: #f4e4b8;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+#start-matchup-button {
+  background: #d6ecff;
+}
+
+.match-summary {
+  margin: 20px 0;
+  padding: 16px;
+  background: #202124;
+  border: 2px solid #555;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.match-summary p {
+  margin: 6px 0;
+  font-size: 16px;
+}
+
+.match-summary strong {
+  color: #f4e4b8;
+}
