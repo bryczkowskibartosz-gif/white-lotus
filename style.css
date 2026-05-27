@@ -306,3 +306,176 @@ button:hover {
 .match-summary strong {
   color: #f4e4b8;
 }
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.card-badges-left {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.chi-badge {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  background: #1f5eff;
+  color: white;
+  border: 2px solid #d6ecff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(45deg);
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+}
+
+.chi-badge span {
+  transform: rotate(-45deg);
+}
+
+.type-badge,
+.element-badge,
+.keyword-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.type-badge {
+  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.type-unit {
+  background: #6b4f1d;
+}
+
+.type-spell {
+  background: #9e2f2f;
+}
+
+.type-reaction {
+  background: #245b8f;
+}
+
+.element-badge {
+  background: #222;
+  color: white;
+}
+
+.keyword-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+
+.keyword-pill {
+  background: #222;
+  color: #f4e4b8;
+  border: 1px solid #f4e4b8;
+}
+
+.keyword-guard {
+  background: #3a2f00;
+  color: #ffdf6b;
+  border-color: #ffdf6b;
+}
+
+.keyword-dodge {
+  background: #193a5a;
+  color: #9be7ff;
+  border-color: #9be7ff;
+}
+
+.keyword-flow {
+  background: #0b3d91;
+  color: #d6ecff;
+  border-color: #d6ecff;
+}
+
+.keyword-ignite {
+  background: #6b1d1d;
+  color: #ffd0d0;
+  border-color: #ff8a8a;
+}
+
+.keyword-momentum {
+  background: #4d3a00;
+  color: #ffe28a;
+  border-color: #ffe28a;
+}
+
+.keyword-fortify {
+  background: #1f4d1f;
+  color: #b8ffb8;
+  border-color: #b8ffb8;
+}
+
+.keyword-swift {
+  background: #3b2a63;
+  color: #e7d6ff;
+  border-color: #e7d6ff;
+}
+
+.keyword-battlecry {
+  background: #4a2f1a;
+  color: #ffd4a3;
+  border-color: #ffd4a3;
+}
+
+.card-text {
+  margin-top: 8px;
+  font-style: normal;
+}
+
+.card {
+  position: relative;
+  padding-bottom: 36px;
+}
+
+.unit-stats-row {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.attack-badge,
+.health-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+}
+
+.attack-badge {
+  background: #8b2f2f;
+}
+
+.health-badge {
+  background: #23571c;
+}

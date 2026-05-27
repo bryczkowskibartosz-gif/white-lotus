@@ -13,6 +13,7 @@ const gameState = {
   phase: "action",
   turnNumber: 1,
   gameLog: [],
+  matchSummaryText: "",
   selectedAttackerIndex: null,
   selectedReactionCardIndex: null,
   selectedSpellCardIndex: null,
@@ -370,6 +371,7 @@ function resetGameState() {
   gameState.phase = "action";
   gameState.turnNumber = 1;
   gameState.gameLog = [];
+  gameState.matchSummaryText = "";
   gameState.selectedAttackerIndex = null;
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
@@ -801,6 +803,30 @@ function getMatchSummaryHtml(winnerPlayer, loserPlayer) {
   `;
 }
 
+function getMatchSummaryText(winnerPlayer, loserPlayer) {
+  const highestMaxChi = Math.max(winnerPlayer.maxChi, loserPlayer.maxChi);
+
+  return [
+    "=== MATCH SUMMARY ===",
+    `Winner: ${winnerPlayer.name}`,
+    `Loser: ${loserPlayer.name}`,
+    `Ended on turn: ${gameState.turnNumber}`,
+    `Highest Chi reached: ${highestMaxChi}`,
+    "",
+    `${winnerPlayer.name} HP: ${winnerPlayer.hp}`,
+    `${winnerPlayer.name} deck: ${winnerPlayer.deck.length}`,
+    `${winnerPlayer.name} hand: ${winnerPlayer.hand.length}`,
+    `${winnerPlayer.name} board: ${winnerPlayer.board.length}`,
+    `${winnerPlayer.name} fatigue: ${winnerPlayer.fatigueDamage}`,
+    "",
+    `${loserPlayer.name} HP: ${loserPlayer.hp}`,
+    `${loserPlayer.name} deck: ${loserPlayer.deck.length}`,
+    `${loserPlayer.name} hand: ${loserPlayer.hand.length}`,
+    `${loserPlayer.name} board: ${loserPlayer.board.length}`,
+    `${loserPlayer.name} fatigue: ${loserPlayer.fatigueDamage}`
+  ].join("\n");
+}
+
 function showWinScreen(winnerPlayer, loserPlayer) {
   const winScreen = document.getElementById("win-screen");
   const winTitle = document.getElementById("win-title");
@@ -812,6 +838,7 @@ function showWinScreen(winnerPlayer, loserPlayer) {
 
   winTitle.textContent = `${winnerPlayer.name} wins!`;
   matchSummary.innerHTML = getMatchSummaryHtml(winnerPlayer, loserPlayer);
+  gameState.matchSummaryText = getMatchSummaryText(winnerPlayer, loserPlayer);
 
   winScreen.classList.remove("hidden");
 }
@@ -832,7 +859,11 @@ function copyGameLog() {
     return;
   }
 
-  const fullLog = gameState.gameLog.join("\n");
+  let fullLog = gameState.gameLog.join("\n");
+
+  if (gameState.matchSummaryText) {
+    fullLog += `\n\n${gameState.matchSummaryText}`;
+  }
 
   navigator.clipboard.writeText(fullLog)
     .then(function () {
@@ -2409,6 +2440,81 @@ function getCardTypeLabel(type) {
   return type;
 }
 
+function getCardTypeBadgeClass(type) {
+  if (type === "unit") {
+    return "type-unit";
+  }
+
+  if (type === "spell") {
+    return "type-spell";
+  }
+
+  if (type === "reaction") {
+    return "type-reaction";
+  }
+
+  return "";
+}
+
+function getCardTypeBadgeHtml(card) {
+  return `
+    <span class="type-badge ${getCardTypeBadgeClass(card.type)}">
+      ${getCardTypeLabel(card.type)}
+    </span>
+  `;
+}
+
+function getElementBadgeHtml(card) {
+  if (!card.element || card.element === "Neutral") {
+    return "";
+  }
+
+  return `<span class="element-badge">${card.element}</span>`;
+}
+
+function getChiBadgeHtml(card) {
+  return `
+    <span class="chi-badge">
+      <span>${card.cost}</span>
+    </span>
+  `;
+}
+
+function getUnitStatsHtml(card) {
+  if (card.type !== "unit") {
+    return "";
+  }
+
+  return `
+    <div class="unit-stats-row">
+      <span class="attack-badge">${card.attack}</span>
+      <span class="health-badge">${card.health}</span>
+    </div>
+  `;
+}
+
+function getKeywordClass(keyword) {
+  return `keyword-${keyword.toLowerCase()}`;
+}
+
+function getKeywordPillsHtml(keywords) {
+  if (!keywords || keywords.length === 0) {
+    return "";
+  }
+
+  const keywordPills = keywords
+    .map(function (keyword) {
+      return `<span class="keyword-pill ${getKeywordClass(keyword)}">${keyword}</span>`;
+    })
+    .join("");
+
+  return `
+    <div class="keyword-row">
+      ${keywordPills}
+    </div>
+  `;
+}
+
 function renderHand(player) {
   const handElement = document.getElementById("player-hand");
 
@@ -2438,30 +2544,17 @@ function renderHand(player) {
     });
     let cardDetails = "";
 
-    if (card.type === "unit") {
-      cardDetails = `
-        <p>Attack: ${card.attack}</p>
-        <p>HP: ${card.health}</p>
-      `;
-    }
-
     if (card.type === "reaction") {
       cardDetails = `
-        <p>Timing: Reaction Phase</p>
-      `;
+    <p>Timing: Reaction Phase</p>
+  `;
     }
 
-    let keywordText = "";
-
-    if (card.keywords) {
-      keywordText = `<p>Keywords: ${card.keywords.join(", ")}</p>`;
-    }
-
-    let elementText = "";
-
-    if (card.element) {
-      elementText = `<p>Element: ${card.element}</p>`;
-    }
+    const typeBadge = getCardTypeBadgeHtml(card);
+    const elementBadge = getElementBadgeHtml(card);
+    const chiBadge = getChiBadgeHtml(card);
+    const unitStats = getUnitStatsHtml(card);
+    const keywordText = getKeywordPillsHtml(card.keywords);
 
     let schoolText = "";
 
@@ -2470,15 +2563,23 @@ function renderHand(player) {
     }
 
     cardElement.innerHTML = `
-      <h4>${card.name}</h4>
-      <p>Cost: ${card.cost} Chi</p>
-      <p>Type: ${getCardTypeLabel(card.type)}</p>
-      ${cardDetails}
-      ${keywordText}
-      ${elementText}
-      ${schoolText}
-      <p>${card.text}</p>
-    `;
+  <div class="card-top-row">
+    <div class="card-badges-left">
+      ${typeBadge}
+      ${elementBadge}
+    </div>
+
+    ${chiBadge}
+  </div>
+
+  <h4>${card.name}</h4>
+  ${cardDetails}
+  ${keywordText}
+  ${schoolText}
+  <p class="card-text">${card.text}</p>
+
+  ${unitStats}
+`;
 
     handElement.appendChild(cardElement);
   });
@@ -2659,12 +2760,10 @@ function renderBoard(player, boardId) {
 
     if (unit.keywords) {
       const visibleKeywords = unit.keywords.filter(function (keyword) {
-        return keyword !== "Dodge" && keyword !== "Guard";
+        return keyword !== "Guard";
       });
 
-      if (visibleKeywords.length > 0) {
-        keywordText = `<p>Keywords: ${visibleKeywords.join(", ")}</p>`;
-      }
+      keywordText = getKeywordPillsHtml(visibleKeywords);
     }
 
     let guardText = "";
