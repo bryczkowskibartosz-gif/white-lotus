@@ -97,9 +97,11 @@ const fireTestDeckIds = [
 
   "overbearing_teacher",
 
-  "old_map",
-  "old_map",
+  "army_recruiter",
 
+  "fiery_mercenary",
+
+  "fire_nation_recruit",
   "fire_nation_recruit",
   "fire_nation_recruit"
 ];
@@ -152,8 +154,8 @@ const earthTestDeckIds = [
 
   "pebble_toss",
 
-  "old_map",
-  "old_map"
+  "village_recruiter",
+  "village_recruiter"
 ];
 
 const airTestDeckIds = [
@@ -252,8 +254,8 @@ const waterTestDeckIds = [
   "scroll_keeper",
   "scroll_keeper",
 
-  "old_map",
-  "old_map",
+  "village_recruiter",
+  "village_recruiter",
 
   "traveling_cook",
   "traveling_cook",

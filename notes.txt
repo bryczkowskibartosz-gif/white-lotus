@@ -1,18 +1,19 @@
 Current working version:
-- TEST_MODE true
+- TEST_MODE false
+- USE_FIXED_DECKS true
+- SHUFFLE_DECKS true
 - 5 unit board limit
+- 10 card hand limit
 - Action Phase / Reaction Phase
 - Shared Chi system
-- Lotus Seal reaction card works
-- Ember Strike spell works
-- Units can attack hero
-- Units can attack enemy units
-- Dead units are removed
+- Matchup selector for Fire / Air / Earth / Water
+- Fixed 30-card test decks for each element
+- Copy Game Log button
+- Improved game logs with start/end phase snapshots
+- Basic win screen with match summary
 - Restart game button
 - Deck and hand counters
-- Max hand size: 10
-- Drawing with full hand burns the drawn card
-- Basic win screen
+- Card burning when drawing with full hand
 - Fatigue: drawing from an empty deck deals increasing damage
 
 Core rules:
@@ -24,13 +25,13 @@ Unspent Chi can be used during that player's next Reaction Phase.
 Reaction cards spend the same Chi as normal cards.
 
 Summoning rule:
-Units summoned during Action Phase or Reaction Phase cannot attack until the player's next Action Phase, unless the card has a special keyword.
+Units summoned during Action Phase or Reaction Phase cannot attack until the player's next Action Phase, unless the card has Swift.
 
-Current Reaction Phase rule:
-Reactions do not interrupt attacks or spells.
+Reaction Phase rule:
+Reactions do not interrupt attacks or moves.
 Damage resolves immediately.
 Dead units are removed before Reaction Phase.
-Reaction cards can only affect units that survived the Action Phase.
+Current enemy-targeted reactions can only affect enemy units that were summoned this turn.
 
 Hand and deck rules:
 Max hand size is 10.
@@ -47,53 +48,43 @@ Current visual rules:
 - Earth = earthy green border
 - Air = cream/yellow border
 - Neutral = gray border
+- Non-neutral elements show an element badge
+- Neutral cards do not show a Neutral badge
+- Chi cost is shown as a blue diamond badge
+- Keywords are shown as small pills
 - Guard = visible badge and glow
 - Valid targets = green highlight
 - Blocked targets = red dashed highlight
 - Selected cards = visible outline
 
 Implemented mechanics:
+- Battlecry: effect triggers after playing a unit.
+- Supported Battlecry effects:
+  - Draw a card type.
+  - Draw a card type with a specific keyword.
+  - Buff self.
+  - Gain hero health.
+  - Buff a random other friendly unit.
+  - Damage a random enemy unit.
 - Swift: unit can attack the turn it is played.
 - Buff: move can give stats to a friendly unit.
 - Guard: enemy attacks must target Guard units first.
 - Dodge: prevents the first damage instance dealt to this unit.
-- Ignite: bonus activates if you damaged the enemy hero earlier this turn. Ignite does not activate from the same card's damage.
+- Ignite: bonus activates if you damaged the enemy hero earlier this turn.
 - Momentum: bonus activates if you played a reaction card during your last Reaction Phase.
-- Flow: spell can be played during both Action Phase and Reaction Phase.
+- Flow: move can be played during both Action Phase and Reaction Phase.
+- Fortify: one-time Earth bonus that activates at the start of your Action Phase if the unit survived since being played.
 - Ice Blast: damages an enemy unit and prevents its next attack.
 - Sweeping Strikes: deals damage to all enemy units. Momentum repeats the damage as a second damage instance.
-- Wind Slice: selects two enemy units and deals damage to both.
+- Wind Slice / Pebble Toss / Splitting Rock: choose two enemy units and damage both.
 - damage_enemy_hero moves auto-cast without target selection.
-- Valid target highlights.
-- Blocked target highlights.
-- Guard visual indicator.
-- Selected card visual feedback.
-- Restart game button.
-- Deck and hand counters.
-- Max hand size: 10.
-- Drawing with full hand burns the drawn card.
-- Basic win screen.
-- Fatigue damage.
-- Air reaction cards: Gust Snare, Crosswind Jab, Be the Leaf.
-- Fortify: one-time Earth bonus that activates at the start of your Action Phase if the unit survived since being played.
-- Earth cards added: Pebble Catcher, Wall Watcher, Proper Stance.
+- gain_hero_health moves auto-cast without target selection.
 
-Reaction card balance notes:
-Reaction cards should usually cost 0–2 Chi.
-They can be stronger than normal cards only when their condition is narrow.
-Flow cards should be slightly weaker than pure Reaction cards because they can be played in both Action Phase and Reaction Phase.
-3+ Chi reactions should be rare and should feel like big swing cards.
-
-Flow design notes:
-A card with Flow can be played during both Action Phase and Reaction Phase.
-Flow cards should usually be flexible, defensive or adaptive effects.
-Flow should mostly belong to Water.
-A Flow card should have at least one of these reasons to play it in the Reaction Phase:
-- uses leftover Chi before refreshing,
-- saves or finishes a unit before the next turn,
-- has a bonus if played in the Reaction Phase,
-- targets units with summonedThisTurn,
-- protects against future turn start effects.
+Neutral spell policy:
+- Neutral spells are currently inactive for fixed-deck testing.
+- Traveler's Rations, Bending Scroll and Old Map can stay in cards.js as parked / future experiment cards.
+- They should not be used in Fire, Air, Earth or Water test decks for now.
+- Neutral test-deck cards should mostly be units, so class spells and class identity stay clearer.
 
 Element identity:
 
@@ -104,161 +95,64 @@ Fire:
 - High attack, lower health.
 - Wants to damage the enemy hero.
 - Uses Ignite.
+- Watch if Fire has enough refill without becoming too explosive.
 
 Air:
 - Trickster / tempo element.
 - Uses reactions.
 - Uses Momentum.
-- Dodges, exhausts, bounces or disrupts.
-- Needs more Air reaction cards soon.
+- Dodges, exhausts, weakens, destroys or disrupts newly summoned units.
+- Should create cool combo turns, but can have dead cards if sequencing is bad.
 
 Earth:
 - Defensive.
 - High health.
 - Guard units.
-- Buffs and stabilizes the board.
-- Needs more cards soon.
+- Fortify and buffs.
+- Stabilizes the board.
+- Watch if Guard + buffs creates board locks too easily.
 
 Water:
 - Flexible and adaptive.
 - Uses Flow.
 - Healing, small damage, protection and recovery.
 - Should be useful in both Action Phase and Reaction Phase.
+- Watch if Water has enough proactive pressure and not only passive stabilization.
 
-Important design note:
-Do not do a full balance pass yet.
-The current card pool is too small for real element-vs-element testing.
-For now, only do a mini balance sanity check:
-- Is any card completely useless?
-- Is any card obviously too strong?
-- Is any keyword impossible to activate?
-- Does the mechanic feel understandable?
+Reaction card balance notes:
+Reaction cards should usually cost 0–2 Chi.
+They can be stronger than normal cards only when their condition is narrow.
+Flow cards should be slightly weaker than pure Reaction cards because they can be played in both Action Phase and Reaction Phase.
+3+ Chi reactions should be rare and should feel like big swing cards.
 
-Added Battlecry mechanic:
-- Battlecry effects trigger after playing a unit.
-- Supported effects:
-  - Draw a card type.
-  - Draw a card type with a specific keyword.
-- Example cards:
-  - Army Recruiter
-  - Fiery Mercenary
-  - Lowly Armorsmith
-  - Village Recruiter
+Current development focus:
+1. Keep the prototype stable.
+2. Test fixed matchups with matchup selector.
+3. Keep neutral spells out of current test decks.
+4. Tune deck composition before changing card numbers too much.
+5. Watch Momentum consistency for Air.
+6. Watch Flow usefulness for Water.
+7. Watch Guard/Fortify lock potential for Earth.
+8. Watch card refill and hand size pressure for Fire.
 
-Next steps:
-
-5. Mini balance sanity check
-- Do not do full balance yet.
-- Check only if any card is obviously too weak, too strong, or useless.
-- Watch Lotus Seal cost.
-- Watch if Momentum has enough reaction support.
-- Watch if Flow cards feel useful in both phases.
-
-6. Expand small card pool
-- Add 2 Fire cards.
-- Add 2 Air cards, including at least 1 Air reaction.
-- Add 2 Earth cards.
-- Add 1 Water card.
-- Add 1 Neutral card.
-- Prefer effects already supported by main.js.
-
-7. Add first Air reaction card
-Goal:
-Give Air a cheap reaction card so Momentum can be activated more naturally.
-
-Simple possible idea:
-Slipstream Step
-Air / Reaction / 1 Chi
-Effect idea: disrupt, dodge, freeze, or protect a unit.
-
-Important:
-Start with a very simple effect.
-Do not create complicated stack/interrupt logic yet.
-
-8. Build small fixed decks
-- Create simple 15-card test decks for Player 1 and Player 2.
-- Use duplicates.
-- Test real game flow with normal Chi and normal draw.
-- Then start proper balance pass.
-
-9. Later MVP goals
-- Add simple enemy AI or hot-seat 2 player mode.
-- Add better card layout and visual clarity.
-- Add basic menu: Start Game / Restart / Rules.
-- Add more original card names and lore text.
-
-Fire vs Earth playtest
-
-Game 1
-Winner: P2
-Winner HP: 16
-Loser HP: -1
-Game ended at max Chi: 10
-What felt too strong: Guard minions vs Fire (can't activate Ignite)
-What felt useless: Ignite cards especially the ones who only damage enemy hero cause they don't contest the board
-Notes: P1 (Fire) had a good start with minions and damage to P2 hero, P2 stabilized with high HP minions and Guard with buffs. Interesting choices with Ignite cards (if you have two of them, you have to decide which one you use to damage enemy hero and lose Ignite bonus to gain Ignite bonus from the other card), ex you have to use Scorch Mark to damage enemy hero so your Fire Initiate gets buff, but you lose out on damage from Scorch Mark because Ignite didn't trigger
-
-Game 2
-Winner: P2 
-Winner HP: 20
-Loser HP: 0
-Game ended at max Chi: 9
-What felt too strong: T2 Stone Guardian + Proper Stance, T3 you can keep buffing the Stone Guardian cause it's not realistic for P1 to have enough minions to deal 6 damage to buffed Stone Guardian
-What felt useless:
-Notes: P2 (Earth) often cannot play anything turn 1-2 cause lack of minions and only buffs in hand, no proactive spells. P1 runs out of cards quickly. P2 often has considerably more cards in hand. P1 has many 1 health minions, so Stone Guardian and Wall Watcher even without buffs seem too good at trading. When you have one or two Guard minions and buffs on them, you can just ignore P1 board and keep going face with your high Health minion and keep summoning minions that are also defended by Guard
-
-Game 3
-Winner: P2
-Winner HP: 20
-Loser HP: -1
-Game ended at max Chi: 8
-What felt too strong: If P2 has one minion that survives (especially if it has Guard) it can be buffed very easily for cheap with Proper Stance and other buffs, to the point where it's impossible to remove (at least considering the current options for removal/no hard removal)
-What felt useless: P1 often gets stuck with Face Burn and Scorch Mark in hand, with no way to activate Ignite, with no buffs to minions, spells that help with board control, and if P2 has Guard it's basically game over on T4 or T5 
-Notes: P1 minions have too little health, not enough proactive cards, probably not enough card draw, when P2 establishes one minion with Guard and buffs, he can keep summoning minions and attacking P1 hero with disregard to P1 board, and then game can easily end at T8/T9/T10, with P1 having 2-3 minions on board that can't even kill one buffed minions from P2, and P2 can just ignore the P1 minions and keep attacking P1 hero
-
-Game 4
-Winner: P2 would eventually win, since P1 has no comeback mechanics and was practically locked out of the game by T8-T10
-Winner HP: -
-Ended at max Chi: -
-Did Fire kill any Guard?: yes, with Fire Whip (felt like effective removal)
-Did Ignite activate often?: yes
-Did Earth still lock Fire?: yes, after T5 Fire was out ouf cards, and Earth could play 2 minions per turn, and Guard still walled out Fire
-Notes: Fortify was harder to activate (ex. Fire Whip killed Pebble Catcher T3). Pebble Catcher is just strictly better Stone Guardian. Shrine Guardian feels like a better Wall Watcher (with Wall Watcher vanilla stats at 0/5) and the neutral Gaurd minion are the same. But Wall Watcher seems more balanced and more grounded when it cannot counterattack the turn he's summoned. Maybe his Fortify bonus could be buffed? Class cards should be on average stronger than Neutral. Board gameplay feel more back-and-forth (Earth couldn't just ignore P1 board and keep going face as before). P1 could trade with P2 players better due to low attack value of P2, at least until T8 where due to low amount of cards P1 was locked out by three P2 Guard minions. By T10 there was no point in playing, as both players could only play one card per turn due to lack of draw, and the gameplay felt slow and it'd take multiple turns for the game to end, with P2 just whacking P1 with low health minions while P2 struggles to play anything that could stick and do anything.
-Most suspicious card: Hard to tell. P1 builds tempo in T1-T3 but after T4 there's not enough gas in P1. P2 is on the defensive for the first few turns, but after that he has more cards in hand than P1 and can play mutiple minions per turn, while P1 struggles to play 1-2 cards per turn. 
-
-Game 5:
-Notes: Why is Bending Scroll (neutral spell) so much stronger than Proper Stance? P2 has a harder time sticking minions, by T5 all minions were removed by P1 the turn they were played, that is good. By T6 P2 can stick a minion or immediately play a minion with buff, and by T6 P1 has not enough cards to deal with it. Basically locking him out again. By T7 has two Guard minions, one with stats 3/7, another with 1/3, P1 has all minions removed. The game is basically over, P1 is in topdeck mode.
-Czy Fire nadal kończy bez ręki przed T6? - by T7 but card draw card was not drawn 
-Czy War Drums pomaga, ale nie robi Fire broken? - War Drums was not drawn this game 
-Czy Earth nadal stabilizuje, ale nie zamyka gry jednym Guardem? - P2 stabilizes later than in previous patches 
-Czy Shrine Guardian jako 0/5 dalej jest użyteczny? - Shrine Guardian got patched to 1/4 
-Czy Wall Watcher czuje się jak class card, a nie gorszy neutral? - Wall Watcher feels balanced and fine 
-
-Game 6:
-Notes: P1 often has dead turn 1. As aggro deck, he should have viable T1 options to start the game as strong as possible. T2 there's often also not many good plays if you don't want to waste Fire Initiate ignite bonus. Probably needs T1 minions, so they can attack T2 and activate Ignite bonuses on T2. P2 also often has dead T1-T2 because of lack of cheap minions and buffs that clog hand, but that is more acceptable as a control/defensive class. Game feels more playable to P1 if P2 can't establish Guard minion early. You can keep activating Ignite to snowball.   
-Czy Fire nadal kończy bez ręki przed T6? - Yes, by turn T6-T7 has topdeck mode 
-Czy War Drums pomaga, ale nie robi Fire broken? - War Drums was not drawn 
-Czy Earth nadal stabilizuje, ale nie zamyka gry jednym Guardem? - P1 was snowballing with minions and Ignite and damage to P2 hero by T5, at that point P2 HP was 17. T5 Earth played Wall Watcher and Burrow into Earth, Wall Watcher was 1/7 and it was enough to lock game out, as P1 had only one card in hand at that point, but three minions on board - all of them were 2 attack each, so couldn't kill Wall Watcher. Since Wall Watcher got buffed, it could counterattack. T6 Earth buffed Wall Watcher even more with two buffs, making it 3/9, thus locking out P1. 
-Czy Shrine Guardian jako 0/5 dalej jest użyteczny? - Shrine Guardian got patched to 1/4 
-Czy Wall Watcher czuje się jak class card, a nie gorszy neutral? - Wall Watcher feels balanced and fine 
-
-Game 7:
-Notes: P1 didn't have any minions to play T1 and T2, but played War Drums T2. P1 played War Drums T4. Could clear all P1 minions up until T4. T4 P2 played Pebble Catcher with two buffs, making it 2/5. P1 managed to remove it with Fire Whip and Ember Strike. T5 P2 had no minions to play, only buffs, so he had to skip T5 with no cards played. By T6, P1 had snowballed and had 4 minions on board (vs 0 of P2) and had dealt 15 damage to P2 hero. T6 P2 played Wall Watcher with Bending Scroll and Proper Stance, making it 1/7. P1 could clear it with Ember Strike and two minions, but they both died since they were 1HP. Feels balanced. T7 P2 had two cards -> Traveler's Rations that could not be played and Wandering Merchant. Only able to spend 1 out of 7 Chi. Traveler's Rations might need to be buffed to also be able to target your hero. Both P1 and P2 might need actual reaction cards, cause Reaction Phase is basically useless right now. Maybe Fire could use some reaction card that says reduce enemy unit HP to 1, so it can be better against high health Buffed minions when P2 overcommits buffs on one unit. P2 could have reaction cards that restore his hero health, or even better -> give extra maximum health so can be played even when at full health to gain extra health. T8 was also dead for P2 with two buffs in hand and no minions. P1 won on T9, P2 HP was 0, P1 HP was 30. 
-Czy Fire nadal kończy bez ręki przed T6? - No, because War Drums was played two times, Fire could keep snowballing and maintain tempo. Game felt good as it felt more dynamic.
-Czy War Drums pomaga, ale nie robi Fire broken? - War Drums was drawn and played two times early in the game. Might be a tad strong, maybe nerfing to Draw 1 Cards, Ignite: Draw another so it cannot be a very strong proactive play with no way to damage enemy hero
-Czy Earth nadal stabilizuje, ale nie zamyka gry jednym Guardem? - P2 was unable to stabilize, might be because of bad draw (drew a lot of buffs with no minions)
-Czy Wall Watcher czuje się jak class card, a nie gorszy neutral? - Wall Watcher feels balanced and fine 
-
-Current balance testing:
-- Added fixed Fire vs Earth test decks.
-- Fire vs Earth matchup is being tested as aggro vs control.
-- Fire needs early pressure and card draw to avoid topdeck mode.
-- Earth stabilizes with Guard, Fortify and buffs.
-- War Drums, Fire Nation Recruit, Traveler's Rations and Bending Scroll changes need more testing.
+Suggested matchup test checklist:
+- Who won?
+- On which turn?
+- How much HP did the winner have?
+- Did either player run out of cards too early?
+- Which card felt dead in hand?
+- Which card felt too strong?
+- Did the class mechanic matter? Ignite / Momentum / Fortify / Flow.
 
 Latest update:
-- Added stronger Water identity cards and neutral minion support.
-- Removed / deprioritized neutral spells for now.
-- Air vs Water test decks are now more playable.
-- Air has better Momentum payoff.
-- Water now has better board presence and Flow support.
+- Improved game logs with start/end phase board snapshots.
+- Game logs now show player HP, Chi, hand size, deck size, board state, Momentum and fatigue.
+- Improved draw logging for cards like Old Map and Open Sky Training.
+- Added Air support tools to improve Momentum consistency:
+  - Wind Reader
+  - Banish in Air test deck
+- Air vs Water testing now shows more Air combo moments and better reaction/Momentum flow.
+- Watchlist:
+  - Scroll Keeper may still be too strong as a neutral value card.
+  - Air still sometimes runs out of cards in late game.
+  - Check if Momentum is active often enough and if Air has enough payoff cards.

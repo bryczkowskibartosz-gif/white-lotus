@@ -823,7 +823,7 @@ const neutralUnits = [
   },
 ];
 
-const neutralSpells = [
+const inactiveNeutralSpells = [
   {
     id: "travelers_rations",
     name: "Traveler's Rations",
@@ -893,6 +893,6 @@ const cards = [
   ...airReactions,
 
   ...neutralUnits,
-  ...neutralSpells,
+  // ...inactiveNeutralSpells,
   ...neutralReactions
 ];

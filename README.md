@@ -10,27 +10,37 @@ MVP prototype with:
 
 - Action Phase and Reaction Phase
 - shared Chi system
-- unit cards, spell/move cards and reaction cards
+- fixed test decks for Fire, Air, Earth and Water
+- matchup selector for quick element-vs-element testing
+- unit cards, move cards and reaction cards
 - unit combat
 - attacks against enemy units and enemy hero
-- spells targeting enemy or friendly units
+- moves targeting enemy units, friendly units or heroes
+- no-target moves such as draw, hero damage and board damage
+- Battlecry effects
 - Flow keyword
 - Ignite keyword
 - Momentum keyword
 - Guard keyword
 - Dodge keyword
 - Swift keyword
+- Fortify keyword
 - board limit
 - max hand size
 - deck and hand counters
 - card burning when drawing with a full hand
 - fatigue damage when drawing from an empty deck
 - basic win screen
+- match summary after the game
 - restart game button
+- copy game log button
 - basic visual card clarity:
   - card type shown by background color
   - element shown by border color
-  - Guard shown with a visual badge
+  - non-neutral element shown by badge
+  - Chi cost shown as a blue diamond badge
+  - keywords shown as small pills
+  - Guard shown with a visual badge and glow
   - valid and blocked targets highlighted
 - element and school card data
 
@@ -50,28 +60,47 @@ MVP prototype with:
 
 ## Current card pool
 
-The current card pool is small and mainly exists to test mechanics.
+The current card pool is still small and mainly exists to test mechanics, class identity and game flow.
 
-Because of that, the project is not ready for a full balance pass yet.
+The project is now ready for small matchup tests, but not for a final balance pass yet.
 
-The next goal is to add a small number of new cards for each element, especially more Air reaction cards and more Earth cards.
+Neutral spells are currently inactive for fixed-deck testing. They can stay in `cards.js` as future experiment cards, but they should not be used in the current Fire, Air, Earth or Water test decks.
+
+Current deck direction:
+
+- Fire: pressure, direct damage, Ignite and card refill.
+- Air: reactions, Dodge, Momentum and tempo tools.
+- Earth: Guard, Fortify, buffs and stabilization.
+- Water: Flow, healing, flexible removal and sticky units.
+- Neutral: mostly units that help smooth early turns or provide generic board presence.
 
 ## Current development focus
 
 1. Keep the prototype stable.
-2. Add a few more cards using existing mechanics.
-3. Add at least one simple Air reaction card to support Momentum.
-4. Build small fixed test decks for Player 1 and Player 2.
-5. Then start proper balance testing.
+2. Test fixed matchups with the matchup selector.
+3. Keep neutral spells out of test decks for now.
+4. Tune deck composition before changing card numbers too much.
+5. Watch if Air gets enough useful Momentum turns.
+6. Watch if Water can stabilize without feeling too passive.
+7. Watch if Earth Guard/Fortify creates board locks too easily.
+8. Watch if Fire has enough card refill without becoming too explosive.
 
 ## How to run
 
 Open `index.html` in a browser.
+
+Recommended local workflow:
+
+1. Open the project folder in VS Code.
+2. Open `index.html` with Live Server.
+3. Pick a matchup in the matchup selector.
+4. Play the game.
+5. Use Copy Game Log after the game and paste the log into balance notes.
 
 ## Files
 
 - `index.html` — page structure
 - `style.css` — visual styling
 - `cards.js` — card data
-- `main.js` — game logic
-- `notes.txt` — design notes and roadmap
+- `main.js` — game logic and fixed test decks
+- `notes.txt` — design notes, roadmap and playtest history
