@@ -86,6 +86,31 @@ const fireUnits = [
       amount: 1
     },
     text: "Battlecry: Draw a Swift unit."
+  },
+  {
+    id: "blazing_skirmisher",
+    name: "Blazing Skirmisher",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Swift", "Ignite"],
+    cost: 5,
+    attack: 5,
+    health: 2,
+    igniteBuff: { attack: 2, health: 0 },
+    text: "Swift. Ignite: Gain +2 Attack."
+  },
+
+  {
+    id: "ember_quartermaster",
+    name: "Ember Quartermaster",
+    element: "Fire",
+    type: "unit",
+    keywords: ["Ignite"],
+    cost: 4,
+    attack: 3,
+    health: 3,
+    igniteDrawAmount: 1,
+    text: "Ignite: Draw a card."
   }
 ];
 
@@ -150,6 +175,29 @@ const fireSpells = [
     drawAmount: 1,
     igniteDrawAmount: 1,
     text: "Draw 1 card. Ignite: Draw 1 more."
+  },
+
+  {
+    id: "searing_lance",
+    name: "Searing Lance",
+    element: "Fire",
+    school: "Firebending",
+    type: "spell",
+    cost: 3,
+    spellType: "damage_enemy_unit",
+    damage: 3,
+    igniteHeroDamage: 3,
+    text: "Deal 3 damage to an enemy unit. Ignite: Deal 3 damage to the enemy hero."
+  },
+
+  {
+    id: "campfire_orders",
+    name: "Campfire Orders",
+    element: "Fire",
+    type: "spell",
+    cost: 1,
+    spellType: "draw_card_or_unit_if_ignite",
+    text: "Draw 1 card. Ignite: Draw a unit instead."
   }
 ];
 

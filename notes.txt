@@ -156,3 +156,21 @@ Latest update:
   - Scroll Keeper may still be too strong as a neutral value card.
   - Air still sometimes runs out of cards in late game.
   - Check if Momentum is active often enough and if Air has enough payoff cards.
+
+  Air vs Water:
+- Air combo identity works.
+- Momentum created cool turns.
+- Air lacks reliable way to convert tempo into lethal.
+- Game lasted too long.
+- Both decks reached empty hand / empty deck too often.
+- Scroll Keeper still suspicious.
+- Banish may be accelerating Air fatigue.
+- Water wins by outlasting, not by a clear proactive plan.
+
+Fire vs Earth:
+Fire refill improved significantly.
+Campfire Orders feels good and thematic.
+Blazing Skirmisher creates exciting finish turns but may be overtuned.
+Fire can now close games instead of stalling.
+Need more games before nerfing.
+Watchlist: Blazing Skirmisher, Scorch Mark + Face Burn burst chains.

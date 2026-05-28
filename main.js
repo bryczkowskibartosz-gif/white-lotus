@@ -85,17 +85,19 @@ const fireTestDeckIds = [
   "wandering_merchant",
 
   "harbor_brawler",
-  "harbor_brawler",
 
-  "young_rascal",
   "young_rascal",
 
   "traveling_cook",
-  "traveling_cook",
 
-  "roadside_colossus",
+  "campfire_orders",
+  "campfire_orders",
 
-  "overbearing_teacher",
+  "searing_lance",
+
+  "ember_quartermaster",
+
+  "blazing_skirmisher",
 
   "army_recruiter",
 
@@ -955,7 +957,8 @@ function isNoTargetSpell(card) {
       card.spellType === "damage_enemy_units" ||
       card.spellType === "damage_enemy_hero" ||
       card.spellType === "draw_cards" ||
-      card.spellType === "gain_hero_health"
+      card.spellType === "gain_hero_health" ||
+      card.spellType === "draw_card_or_unit_if_ignite"
     )
   );
 }
@@ -1142,6 +1145,30 @@ function playCard(cardIndex) {
   const enemyPlayer = gameState.players[getEnemyPlayerIndex()];
   const battlecryMessages = resolveBattlecry(currentPlayer, enemyPlayer, unit);
 
+  const igniteDrawMessages = [];
+
+  if (
+    hasKeyword(card, "Ignite") &&
+    isIgniteActive(currentPlayer) &&
+    card.igniteDrawAmount
+  ) {
+    for (let i = 0; i < card.igniteDrawAmount; i++) {
+      const drawResult = drawCard(currentPlayer);
+
+      if (drawResult.drewCard) {
+        igniteDrawMessages.push(`drew ${drawResult.cardName}`);
+      }
+
+      if (drawResult.burnedCard) {
+        igniteDrawMessages.push(`hand was full, ${drawResult.cardName} was burned`);
+      }
+
+      if (drawResult.fatigueDamage > 0) {
+        igniteDrawMessages.push(`took ${drawResult.fatigueDamage} fatigue damage`);
+      }
+    }
+  }
+
   let message = "";
 
   if (hasKeyword(card, "Swift")) {
@@ -1152,6 +1179,10 @@ function playCard(cardIndex) {
 
   if (battlecryMessages.length > 0) {
     message += ` Battlecry: ${battlecryMessages.join(", ")}.`;
+  }
+
+  if (igniteDrawMessages.length > 0) {
+    message += ` Ignite: ${igniteDrawMessages.join(", ")}.`;
   }
 
   showMessage(message);
@@ -1737,6 +1768,7 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     const damageResult = dealDamageToUnit(targetUnit, spellCard.damage);
 
     let message = "";
+    const igniteWasActive = isIgniteActive(currentPlayer);
 
     if (damageResult.wasDodged) {
       message = `${targetUnit.name} dodged ${spellCard.name}.`;
@@ -1747,6 +1779,12 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     if (spellCard.preventsNextAttack && targetUnit.currentHealth > 0) {
       targetUnit.skipNextAttack = true;
       message += ` ${targetUnit.name} can't attack next turn.`;
+    }
+
+    if (igniteWasActive && spellCard.igniteHeroDamage) {
+      enemyPlayer.hp -= spellCard.igniteHeroDamage;
+      currentPlayer.damagedEnemyHeroThisTurn = true;
+      message += ` Ignite activated: dealt ${spellCard.igniteHeroDamage} damage to ${enemyPlayer.name}.`;
     }
 
     currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
@@ -1760,6 +1798,9 @@ function castSpellOnEnemyUnit(enemyUnitIndex) {
     gameState.selectedWindSliceTargets = [];
 
     showMessage(message);
+
+    checkGameOver();
+
     renderGame();
     return;
   }
@@ -1976,6 +2017,52 @@ function castNoTargetSpell() {
     showMessage(message);
 
     checkGameOver();
+    renderGame();
+    return;
+  }
+
+  if (spellCard.spellType === "draw_card_or_unit_if_ignite") {
+    currentPlayer.currentChi -= spellCard.cost;
+
+    const igniteWasActive = isIgniteActive(currentPlayer);
+
+    currentPlayer.hand.splice(gameState.selectedSpellCardIndex, 1);
+    gameState.selectedSpellCardIndex = null;
+
+    let drawResult;
+
+    if (igniteWasActive) {
+      drawResult = drawCardType(currentPlayer, "unit");
+    } else {
+      drawResult = drawCard(currentPlayer);
+    }
+
+    let message = `${spellCard.name}: `;
+
+    if (igniteWasActive) {
+      message += "Ignite activated. ";
+    }
+
+    if (drawResult.drewCard) {
+      message += `drew ${drawResult.cardName}.`;
+    }
+
+    if (drawResult.burnedCard) {
+      message += `hand was full, ${drawResult.cardName} was burned.`;
+    }
+
+    if (drawResult.noMatchingCard) {
+      message += "no unit found in deck.";
+    }
+
+    if (drawResult.fatigueDamage > 0) {
+      message += `took ${drawResult.fatigueDamage} fatigue damage.`;
+    }
+
+    showMessage(message);
+
+    checkGameOver();
+
     renderGame();
     return;
   }
