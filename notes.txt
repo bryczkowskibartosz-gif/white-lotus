@@ -157,20 +157,83 @@ Latest update:
   - Air still sometimes runs out of cards in late game.
   - Check if Momentum is active often enough and if Air has enough payoff cards.
 
-  Air vs Water:
-- Air combo identity works.
-- Momentum created cool turns.
-- Air lacks reliable way to convert tempo into lethal.
-- Game lasted too long.
-- Both decks reached empty hand / empty deck too often.
-- Scroll Keeper still suspicious.
-- Banish may be accelerating Air fatigue.
-- Water wins by outlasting, not by a clear proactive plan.
+Fire vs Earth test 1:
+- Winner: Fire, turn 17.
+- Fire ended at 32 HP, 0 hand, 12 deck.
+- Earth healed twice but still lost.
+- Fire refill felt strong but not infinite.
+- War Drums + Campfire Orders helped Fire avoid early empty hand.
+- Earth had very slow early game and spent early Chi on healing instead of board.
+- Guard + buff did not feel oppressive this game.
+- Watchlist: Fire Whip efficiency vs Earth, Earth early tempo, Enduring Spirit passivity.
 
-Fire vs Earth:
-Fire refill improved significantly.
-Campfire Orders feels good and thematic.
-Blazing Skirmisher creates exciting finish turns but may be overtuned.
-Fire can now close games instead of stalling.
-Need more games before nerfing.
-Watchlist: Blazing Skirmisher, Scorch Mark + Face Burn burst chains.
+Fire vs Water test 1:
+- Winner: Water, turn 18.
+- Water ended at 10 HP, 5 board, 2 hand, 15 deck.
+- Fire ended with 0 HP, 0 hand, 1 board, 17 deck.
+- Fire had weak early start: no early unit until Fire Nation Recruit on T5.
+- Fire Whip felt strong but necessary; killed River Guardian cleanly.
+- Blazing Skirmisher hit for 5 but was answered next turn, not game-breaking here.
+- Water stabilized into proactive board pressure around T10-T14.
+- Scroll Keeper buff on Turtle Duck created major pressure; still suspicious.
+- Flow cards felt useful, especially River Spark/Tidal Splash reaction turn.
+- Fire lost mainly because it ran out of hand/board, not because it lacked burst.
+- UX note: Flowing Touch prompt should say it can target unit or hero.
+
+Fire vs Air test 1:
+- Winner: Air, turn 18.
+- Air ended at 19 HP, 5 board, 3 hand, 11 deck.
+- Fire ended with 0 hand and mostly played from topdeck after mid game.
+- Fire had a decent early start with Fire Nation Recruit / Traveling Cook / Young Rascal.
+- Air answered Fire's early board very well.
+- Simple Monk + Dodge traded favorably into Fire Nation Recruit.
+- Wind Slice on T6 was a major tempo swing: killed Young Rascal and Traveling Cook.
+- Banish in Reaction Phase activated Momentum and drew 2 cards.
+- Open Sky Training with Momentum drew 2 and enabled double Gale Trainee.
+- Gale Trainee as 3/3 with Momentum felt like a real payoff.
+- Air successfully converted tempo into lethal through board pressure.
+- Watchlist: Banish may be too efficient as 1 Chi draw 2 + Momentum enabler.
+- Watchlist: Fire may run out of hand too often if refill is not drawn early.
+
+Air vs Water test 1:
+- Winner: Air, turn 24.
+- Air ended at 11 HP, 4 board, 1 hand, 8 deck.
+- Water ended at 0 HP, 2 board, 0 hand, 14 deck.
+- Water had strong early game and pushed Air to 16 HP while staying at 32 HP.
+- Air had a clunky early hand and slow start, but still stabilized.
+- Wind Slice was important again; strong but fair as a two-target tempo tool.
+- Scroll Keeper buffed River Guardian and created a strong Water board, but Air answered it.
+- Key swing: Banish activated Momentum, then double Sweeping Strikes cleared Water's board.
+- After the board clear, Water had no reliable refill and played from topdeck.
+- Air reactions repeatedly denied Water's comeback attempts: Sudden Gale, Crosswind Jab, Gust Snare.
+- Watchlist: Banish may be too efficient as 1 Chi draw 2 + Momentum enabler.
+- Watchlist: Water may need better refill or rebuild tools after losing board.
+
+Air vs Earth test 1:
+- Winner: Earth, turn 45.
+- Earth ended at 28 HP, 2 board, 0 hand, 1 deck.
+- Air ended at -1 HP, 0 board, 0 hand, 0 deck, fatigue 3.
+- Very long grind game.
+- Earth had slow start but survived easily because Air lacked early face pressure.
+- Dodge was strong into Earth’s low-attack Guards; Air killed Stone Guardian with minimal losses.
+- Pebble Toss was excellent into Air’s small Dodge units.
+- Earth often played from topdeck but had high-impact topdecks.
+- Air drew aggressively and reached fatigue first.
+- Banish was strong but also accelerated Air fatigue.
+- Earth late game seems favored due to HP buffer, Guard units and heavier topdecks.
+- Watchlist: games may be too long.
+- Important rules check: Air played multiple reactions in one Reaction Phase; decide if this is intended.
+
+Earth vs Water test 1:
+- Winner: Water, turn 28.
+- Water ended at 28 HP, 4 board, 1 hand, 10 deck.
+- Earth ended at 0 HP, 0 board, 0 hand, 12 deck.
+- Earth had strong early game with Pebble Catcher + Fortify + Burrow into Earth.
+- Water had a slow/clunky start but stabilized with Stream Guide and Roadside Colossus.
+- Roadside Colossus was a major stabilizer and pressure source for Water.
+- Earth spent a lot of resources removing big Water units.
+- After T18, Water maintained a wide board while Earth played from topdeck.
+- Earth single defensive topdecks were not enough to recover.
+- Water won through sticky board pressure, not fatigue.
+- Important bug watch: Flowing Touch appears to be playable twice after being used in Reaction Phase.
+- Watchlist: Roadside Colossus + Water healing may be too sticky.

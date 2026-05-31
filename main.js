@@ -104,7 +104,6 @@ const fireTestDeckIds = [
   "fiery_mercenary",
 
   "fire_nation_recruit",
-  "fire_nation_recruit",
   "fire_nation_recruit"
 ];
 
