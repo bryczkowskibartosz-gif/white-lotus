@@ -273,7 +273,7 @@ const waterSpells = [
     spellType: "heal_friendly_unit",
     canTargetHero: true,
     heal: 2,
-    text: "Flow. Restore 2 HP to a friendly unit or your hero."
+    text: "Flow. Your hero gains 2 HP, or restore 2 HP to a friendly unit."
   },
 
   {
@@ -820,9 +820,9 @@ const neutralUnits = [
     health: 3,
     battlecry: {
       type: "buff_random_other_friendly_unit",
-      buff: { attack: 2, health: 1 }
+      buff: { attack: 1, health: 1 }
     },
-    text: "Battlecry: Give another random friendly unit +2/+1."
+    text: "Battlecry: Give another random friendly unit +1/+1."
   },
 
   {

@@ -153,8 +153,6 @@ button:hover {
 }
 
 .multi-target-selected {
-  outline: 4px solid #c77dff;
-  box-shadow: 0 0 16px rgba(199, 125, 255, 0.7);
   transform: translateY(-6px);
 }
 
@@ -478,4 +476,29 @@ button:hover {
 
 .health-badge {
   background: #23571c;
+}
+
+.mulligan-selected {
+  outline: 4px solid #b8ffb8;
+  box-shadow: 0 0 18px rgba(184, 255, 184, 0.75);
+  transform: translateY(-6px);
+}
+
+.mulligan-selected::after {
+  content: "Replace";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #23571c;
+  color: #b8ffb8;
+  border: 1px solid #b8ffb8;
+  border-radius: 999px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+#confirm-mulligan-button {
+  background: #b8ffb8;
 }

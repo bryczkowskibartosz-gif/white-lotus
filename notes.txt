@@ -237,3 +237,87 @@ Earth vs Water test 1:
 - Water won through sticky board pressure, not fatigue.
 - Important bug watch: Flowing Touch appears to be playable twice after being used in Reaction Phase.
 - Watchlist: Roadside Colossus + Water healing may be too sticky.
+
+Balance matrix notes:
+- Multiple reactions per Reaction Phase are intentional.
+- Reaction cards remain balanced around saved Chi and situational targets.
+- Flowing Touch suspected bug was false positive; Water drew the second copy.
+- Fire test deck was fixed to 30 cards.
+- Main watchlists:
+  - Banish as 1 Chi draw 2 + Momentum enabler.
+  - Roadside Colossus in Water as sticky board stabilizer.
+  - Earth struggles to recover against wide Water boards.
+  - Fire can run out of hand if refill is not drawn.
+
+  Fire vs Water test 2:
+- Winner: Water, turn 22.
+- Water ended at 21 HP, 4 board, 1 hand, 15 deck.
+- Fire ended at 0 hand, 1 board, 16 deck.
+- Fire had clunky spell-heavy opening hand: Face Burn / Fire Whip / Face Burn.
+- Fire started pressure late with Fire Nation Recruit on T3.
+- Tidal Splash on T8 was a major swing: cleared Fire's small units.
+- Waterbending Initiate was very strong vs Fire: survived, traded well, got healed, then got buffed by Scroll Keeper.
+- Fire removal answered single threats, but Fire could not handle wide Water board.
+- Fire again ran out of hand before dealing enough damage.
+- Scroll Keeper again created major board pressure.
+- Rules watch: Flowing Touch can heal hero above 30 HP; decide if overheal is intended.
+
+Fire vs Air test 2:
+- Winner: Fire, turn 21.
+- Fire ended at 1 HP, 1 hand, 1 board, 15 deck.
+- Air ended at -1 HP, 3 hand, full board, 13 deck.
+- Fire had strong early pressure with Wandering Merchant, Campfire Orders into Fire Nation Recruit, and early face damage.
+- Air had a slow opening and no early board until Turtle Duck.
+- Wind Slice was excellent again, clearing Fire’s small units twice.
+- Fire ran low on hand, but pushed Air into lethal range with burst.
+- Key Fire burst turn: Southern Raider + Searing Lance with Ignite + Face Burn brought Air to 4 HP.
+- Air stabilized and built a full board, but had no way to escape Fire’s final burst range.
+- Blazing Skirmisher ended the game from hand at 1 HP Fire, exact dramatic lethal.
+- Matchup seems healthy: Fire can win through early pressure + reach; Air can win if it stabilizes before dropping too low.
+- Watchlist: Blazing Skirmisher as finisher, Wind Slice vs Fire small boards, Fire hand depletion.
+
+Earth vs Water test 2:
+- Winner: Earth, turn 29.
+- Earth ended at 35 HP, 2 board, 0 hand, 10 deck.
+- Water ended at 0 HP, 3 board, 0 hand, 11 deck.
+- Matchup looked healthier than test 1; both classes now have a win.
+- Earth won by establishing early Guard pressure with Wall Watcher + Burrow into Earth.
+- Roadside Colossus helped Earth keep board control and answer Water threats.
+- Water had strong comeback attempts with Scroll Keeper, Waterbending Initiate and double Flowing Touch.
+- Earth successfully answered Water boards with Shifting Sands, Pebble Toss and trades.
+- Current pattern: matchup seems board-tempo dependent, not clearly one-sided.
+- Flowing Touch overheal is intentional; update card text and targeting prompt to make this clear.
+
+Fire vs Water test 3:
+- Winner: Water, turn 22.
+- Water ended at 7 HP, 3 board, 1 hand, 15 deck.
+- Fire ended at 0 HP, 0 hand, 0 board, 11 deck.
+- Fire got Water very low by T13, down to 7 HP.
+- Fire's burst plan worked, but Fire ran out of hand immediately after.
+- War Drums came late and only drew 1 card because Ignite was not active.
+- Water stabilized through sticky board: Roadside Colossus, Scroll Keeper, Waterbending Initiate.
+- Scroll Keeper buff on Roadside Colossus created a major stabilizing threat.
+- Fire could remove some threats, but could not both clear board and finish face.
+- Pattern confirmed after 3 games: Water is favored vs Fire.
+- Recommended small patch: -1 Face Burn, +1 Campfire Orders or +1 Army Recruiter.
+
+Fire vs Water test 4:
+- Played after deck change: -1 Face Burn, +1 Army Recruiter.
+- Winner: Water, turn 22.
+- Water ended at 19 HP, 3 board, 1 hand, 14 deck.
+- Fire ended at -1 HP, 2 board, 1 hand, 11 deck.
+- Fire opening hand was very reactive: Searing Lance, Fire Whip, Fire Whip.
+- Fire had no early board pressure until Young Rascal on T5.
+- Army Recruiter appeared very late and did not affect the early/midgame.
+- Fire removed individual threats but did not pressure Water enough.
+- Water again stabilized through Waterbending Initiate + Scroll Keeper.
+- Pattern: Fire needs more proactive early units, not only more draw.
+- Suggested next test patch: -1 Fire Whip, +1 Fire Nation Recruit or +1 Flame Adept.
+
+Mulligan MVP added:
+- Before Turn 1, each player sees their starting 3 cards.
+- Players can click cards to mark them for replacement.
+- Confirm Mulligan redraws the same number of cards.
+- Replaced cards return to the deck after redraw, then the deck is shuffled.
+- Player 1 mulligans first, then Player 2.
+- Game starts after both players confirm.

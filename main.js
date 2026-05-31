@@ -7,6 +7,7 @@ const DEFAULT_PLAYER_2_ELEMENT = "Water";
 
 const MAX_BOARD_SIZE = 5;
 const MAX_HAND_SIZE = 10;
+const STARTING_HAND_SIZE = 3;
 
 const gameState = {
   currentPlayerIndex: 0,
@@ -18,6 +19,8 @@ const gameState = {
   selectedReactionCardIndex: null,
   selectedSpellCardIndex: null,
   selectedWindSliceTargets: [],
+  mulliganActive: false,
+  mulliganSelectedCardIndexes: [],
   gameOver: false,
 
   players: [
@@ -56,6 +59,8 @@ const gameState = {
 const fireTestDeckIds = [
   // Fire units — early pressure / Ignite setup
   "spark_thrower",
+  "spark_thrower",
+
   "confident_duelist",
 
   "flame_adept",
@@ -69,12 +74,10 @@ const fireTestDeckIds = [
   "ember_strike",
 
   "fire_whip",
-  "fire_whip",
 
   "scorch_mark",
   "scorch_mark",
 
-  "face_burn",
   "face_burn",
 
   "war_drums",
@@ -99,6 +102,7 @@ const fireTestDeckIds = [
 
   "blazing_skirmisher",
 
+  "army_recruiter",
   "army_recruiter",
 
   "fiery_mercenary",
@@ -379,6 +383,8 @@ function resetGameState() {
   gameState.selectedReactionCardIndex = null;
   gameState.selectedSpellCardIndex = null;
   gameState.selectedWindSliceTargets = [];
+  gameState.mulliganActive = false;
+  gameState.mulliganSelectedCardIndexes = [];
   gameState.gameOver = false;
 
   gameState.players.forEach(function (player) {
@@ -410,7 +416,7 @@ function startGame() {
     shuffleDeck(player2.deck);
   }
 
-  const startingHandSize = TEST_MODE ? cards.length : 3;
+  const startingHandSize = TEST_MODE ? cards.length : STARTING_HAND_SIZE;
 
   for (let i = 0; i < startingHandSize; i++) {
     if (TEST_MODE) {
@@ -423,11 +429,38 @@ function startGame() {
   }
 
   if (TEST_MODE) {
+    beginGameAfterMulligan();
+    return;
+  }
+
+  gameState.phase = "mulligan";
+  gameState.currentPlayerIndex = 0;
+  gameState.mulliganActive = true;
+  gameState.mulliganSelectedCardIndexes = [];
+
+  showMessage(`${player1.name}: choose cards to replace, then confirm mulligan.`);
+
+  renderGame();
+}
+
+function beginGameAfterMulligan() {
+  const player1 = gameState.players[0];
+  const player2 = gameState.players[1];
+
+  gameState.mulliganActive = false;
+  gameState.mulliganSelectedCardIndexes = [];
+  gameState.currentPlayerIndex = 0;
+  gameState.phase = "action";
+  gameState.turnNumber = 1;
+
+  if (TEST_MODE) {
     player1.maxChi = 10;
     player1.currentChi = 10;
+    player1.hasHadActionPhase = true;
 
     player2.maxChi = 10;
     player2.currentChi = 10;
+    player2.hasHadActionPhase = true;
   } else {
     player1.maxChi = 1;
     player1.currentChi = 1;
@@ -442,6 +475,86 @@ function startGame() {
   logGameStateSnapshot("START GAME");
 
   renderGame();
+}
+
+function toggleMulliganCard(cardIndex) {
+  if (!gameState.mulliganActive) {
+    return;
+  }
+
+  const selectedIndexes = gameState.mulliganSelectedCardIndexes;
+  const existingIndex = selectedIndexes.indexOf(cardIndex);
+
+  if (existingIndex === -1) {
+    selectedIndexes.push(cardIndex);
+  } else {
+    selectedIndexes.splice(existingIndex, 1);
+  }
+
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
+  showMessage(
+    `${currentPlayer.name}: ${selectedIndexes.length} card(s) selected for mulligan.`
+  );
+
+  renderGame();
+}
+
+function confirmMulligan() {
+  if (!gameState.mulliganActive) {
+    return;
+  }
+
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+
+  const selectedIndexes = [...gameState.mulliganSelectedCardIndexes].sort(function (a, b) {
+    return b - a;
+  });
+
+  const cardsToReturn = [];
+
+  selectedIndexes.forEach(function (cardIndex) {
+    const removedCards = currentPlayer.hand.splice(cardIndex, 1);
+
+    if (removedCards.length > 0) {
+      cardsToReturn.push(removedCards[0]);
+    }
+  });
+
+  const redrawCount = cardsToReturn.length;
+  const drawnCardNames = [];
+
+  for (let i = 0; i < redrawCount; i++) {
+    const drawResult = drawCard(currentPlayer);
+
+    if (drawResult.drewCard) {
+      drawnCardNames.push(drawResult.cardName);
+    }
+  }
+
+  currentPlayer.deck.push(...cardsToReturn);
+  shuffleDeck(currentPlayer.deck);
+
+  if (redrawCount === 0) {
+    addGameLogEntry(`${currentPlayer.name} kept all starting cards.`);
+  } else {
+    addGameLogEntry(
+      `${currentPlayer.name} mulliganed ${redrawCount} card(s). Drew: ${drawnCardNames.join(", ")}.`
+    );
+  }
+
+  gameState.mulliganSelectedCardIndexes = [];
+
+  if (gameState.currentPlayerIndex === 0) {
+    gameState.currentPlayerIndex = 1;
+
+    showMessage(`${gameState.players[1].name}: choose cards to replace, then confirm mulligan.`);
+
+    renderGame();
+    return;
+  }
+
+  beginGameAfterMulligan();
 }
 
 function drawCard(player) {
@@ -1031,6 +1144,11 @@ function playCard(cardIndex) {
     return;
   }
 
+  if (gameState.phase === "mulligan") {
+    toggleMulliganCard(cardIndex);
+    return;
+  }
+
   if (gameState.selectedSpellCardIndex === cardIndex) {
     if (isNoTargetSpell(card)) {
       castNoTargetSpell();
@@ -1226,7 +1344,7 @@ function selectSpellCard(cardIndex) {
   }
 
   if (card.spellType === "heal_friendly_unit") {
-    showMessage(`${card.name} selected. Click one of your units.`);
+    showMessage(`${card.name} selected. Click one of your friendly targets.`);
     renderGame();
     return;
   }
@@ -1512,6 +1630,11 @@ function playReactionOnFriendlyUnit(friendlyUnitIndex) {
 
 function endTurn() {
   if (gameState.gameOver) {
+    return;
+  }
+
+  if (gameState.phase === "mulligan") {
+    showMessage("Confirm mulligan first.");
     return;
   }
 
@@ -2448,6 +2571,10 @@ function checkGameOver() {
 }
 
 function getPhaseName() {
+  if (gameState.phase === "mulligan") {
+    return "Mulligan";
+  }
+
   if (gameState.phase === "action") {
     return "Action Phase";
   }
@@ -2480,11 +2607,28 @@ function renderGame() {
   }
 
   const endTurnButton = document.getElementById("end-turn-button");
+  const confirmMulliganButton = document.getElementById("confirm-mulligan-button");
 
-  if (gameState.phase === "action") {
-    endTurnButton.textContent = "End Action Phase";
+  if (gameState.phase === "mulligan") {
+    endTurnButton.classList.add("hidden");
+
+    if (confirmMulliganButton) {
+      confirmMulliganButton.classList.remove("hidden");
+      confirmMulliganButton.textContent =
+        `Confirm Mulligan (${gameState.mulliganSelectedCardIndexes.length})`;
+    }
   } else {
-    endTurnButton.textContent = "Pass Reaction";
+    endTurnButton.classList.remove("hidden");
+
+    if (confirmMulliganButton) {
+      confirmMulliganButton.classList.add("hidden");
+    }
+
+    if (gameState.phase === "action") {
+      endTurnButton.textContent = "End Action Phase";
+    } else {
+      endTurnButton.textContent = "Pass Reaction";
+    }
   }
 
   const enemyArea = document.querySelector(".enemy");
@@ -2624,6 +2768,13 @@ function renderHand(player) {
 
     if (gameState.selectedSpellCardIndex === index) {
       cardElement.classList.add("selected-spell-card");
+    }
+
+    if (
+      gameState.phase === "mulligan" &&
+      gameState.mulliganSelectedCardIndexes.includes(index)
+    ) {
+      cardElement.classList.add("mulligan-selected");
     }
 
     cardElement.addEventListener("click", function (event) {
@@ -2904,6 +3055,7 @@ ${frozenText}
 }
 
 document.getElementById("end-turn-button").addEventListener("click", endTurn);
+document.getElementById("confirm-mulligan-button").addEventListener("click", confirmMulligan);
 document.getElementById("restart-button").addEventListener("click", startGame);
 document.getElementById("win-restart-button").addEventListener("click", startGame);
 document.querySelector(".enemy").addEventListener("click", attackEnemyHero);
